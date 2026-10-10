@@ -29,7 +29,7 @@ def is_cjk(ch: str) -> bool:
 
 
 def page_chars() -> set[str]:
-    text = html.unescape(re.sub(r"<style>.*?</style>|<[^>]+>", " ", PAGE.read_text(), flags=re.S))
+    text = html.unescape(re.sub(r"<style>.*?</style>|<script\b.*?</script>|<[^>]+>", " ", PAGE.read_text(), flags=re.S))
     return {ch for ch in text if ch.isprintable() and not ch.isspace()}
 
 

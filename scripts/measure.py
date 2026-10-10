@@ -30,11 +30,13 @@ def weigh(text: str, base: pathlib.Path | None = None) -> dict:
         for url in sorted(set(re.findall(r'url\("?([^")]+\.woff2)"?\)', text))):
             fonts += (base / url).stat().st_size
         srcs = set(re.findall(r'<img[^>]*\ssrc="([^"]+)"', text)) | set(re.findall(r'url\("?([^")]+\.png)"?\)', text))
+        srcs |= {m.lstrip("/") for m in re.findall(r'<link rel="icon" href="([^"]+)" sizes="32x32"', text)}  # the tab icon
         for src in sorted(srcs):
             img += (base / src).stat().st_size
     css = sum(len(m.encode()) for m in re.findall(r"<style>(.*?)</style>", text, re.S))
     svg = sum(len(m.encode()) for m in re.findall(r"<svg.*?</svg>", text, re.S))
-    js = sum(len(m.encode()) for m in re.findall(r"<script\b.*?</script>", text, re.S | re.I))
+    scripts = re.findall(r"<script\b(?![^>]*type=\"application/ld\+json\")[^>]*>.*?</script>", text, re.S | re.I)
+    js = sum(len(m.encode()) for m in scripts)  # JSON-LD is data the browser never runs
     js += sum(len(m.encode()) for m in re.findall(r'\son[a-z]+="[^"]*"', text))
     gz = len(gzip.compress(raw, 9, mtime=0))
     markup = len(raw) - css - svg - js

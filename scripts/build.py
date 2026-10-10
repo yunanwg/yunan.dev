@@ -5,11 +5,13 @@
 2. Check every character on the page is in the font subsets (fonts/subset.txt).
 3. Read brilliant-CV's stars and contributors from the GitHub API.
 4. Give fonts and images content-hashed names, so they can be cached forever.
-5. Weigh the page, write the numbers in, and gate on the R5 budget.
+5. Write sitemap.xml and .well-known/security.txt.
+6. Weigh the page, write the numbers in, and gate on the R5 budget.
 
 Standard library only. GITHUB_TOKEN, if set, raises the API rate limit.
 Run: python3 scripts/build.py
 """
+import datetime
 import hashlib
 import html
 import json
@@ -17,6 +19,7 @@ import os
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import urllib.request
 
@@ -43,7 +46,7 @@ def copy() -> None:
 
 def check_glyphs(page: str) -> None:
     subset = "".join(line.split("\t", 1)[1] for line in (SITE / "fonts/subset.txt").read_text().splitlines())
-    text = html.unescape(re.sub(r"<style>.*?</style>|<[^>]+>", " ", page, flags=re.S))
+    text = html.unescape(re.sub(r"<style>.*?</style>|<script\b.*?</script>|<[^>]+>", " ", page, flags=re.S))
     missing = sorted({ch for ch in text if ch.isprintable() and not ch.isspace() and ch not in subset})
     if missing:
         fail(f"characters not in the font subsets: {''.join(missing)!r}. Run python3 scripts/fonts.py")
@@ -78,6 +81,32 @@ def hash_assets(page: str) -> str:
     return page
 
 
+def last_modified() -> str:
+    """When the page last changed: its last commit, or today outside a git checkout."""
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cs", "--", "site/"], cwd=ROOT,
+                             capture_output=True, text=True, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        out = ""
+    return out or datetime.date.today().isoformat()
+
+
+def well_known() -> None:
+    (DIST / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f'  <url><loc>https://yunan.dev/</loc><lastmod>{last_modified()}</lastmod></url>\n'
+        '</urlset>\n')
+    # RFC 9116 wants an expiry under a year away; the weekly rebuild keeps it fresh.
+    expires = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=360)).strftime("%Y-%m-%dT00:00:00Z")
+    (DIST / ".well-known").mkdir(exist_ok=True)
+    (DIST / ".well-known/security.txt").write_text(
+        "Contact: mailto:bonjour@yunan.dev\n"
+        f"Expires: {expires}\n"
+        "Preferred-Languages: en, fr, zh\n"
+        "Canonical: https://yunan.dev/.well-known/security.txt\n")
+
+
 def main() -> None:
     copy()
     index = DIST / "index.html"
@@ -93,6 +122,7 @@ def main() -> None:
     if unhashed:
         fail(f"asset references not hashed: {unhashed}")
     index.write_text(page)
+    well_known()
     w = measure.process(index)
     print(f"dist/index.html: HTML {w['gz']:,} B gzip, fonts {w['fonts']:,} B, images {w['img']:,} B")
     measure.report(w)

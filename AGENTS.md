@@ -32,6 +32,12 @@ npx wrangler@4 dev            # preview dist/ as Cloudflare serves it, with _hea
 - a character on the page is missing from the font subsets;
 - the GitHub API can't be read (a stale count must not ship; the last deploy stays up).
 
+The build also writes `sitemap.xml` and `.well-known/security.txt` (expiry renewed
+on every build). `robots.txt` welcomes search and AI answers and opts out of
+training (`Content-Signal: ai-train=no`, plus the training-only crawlers).
+The JSON-LD block in the head is data, not script: the budget check ignores it.
+HTML is at about 13.5 of 14 kB, so new head tags or copy need weighing.
+
 ## Editing the page
 
 - `site/index.html` is the only source of copy. Edit it directly.
@@ -56,6 +62,8 @@ and their outputs are committed.
 | `scripts/fig1.py` | Fig. 1 SVG, keyframes and caption in `site/index.html` | `assets/tmb-profile.json` changes |
 | `scripts/plates.py` | `site/img/*.png` photo plates (needs Pillow) | a photo or crop changes |
 | `scripts/marks.py` | `site/img/mark-*.png` employer marks (needs Pillow) | a mark changes |
+| `scripts/icons.py` | `site/favicon.ico`, `favicon-96.png`, `apple-touch-icon.png` from the Fig. 2 ibex (needs Pillow) | the icon changes |
+| `scripts/og.py` | `site/og.png`, the link preview: the cover's name beside Fig. 2 (needs Pillow and Chrome) | the cover or Fig. 2 changes |
 | `scripts/strip.py` | strips a JPEG's metadata in place, losslessly | a new original lands in `assets/` |
 | `scripts/fonts.py` | `site/fonts/*.woff2`, `site/fonts/subset.txt` | the build reports a missing character |
 
