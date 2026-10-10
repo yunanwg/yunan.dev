@@ -86,3 +86,16 @@ Pushes to `main` build and deploy through GitHub Actions with
 deploying. Credentials live in the `production` environment, which only
 `main` can deploy to: the secret `CLOUDFLARE_API_TOKEN` (Workers deploy only)
 and the variable `CLOUDFLARE_ACCOUNT_ID`.
+
+## Known issues
+
+- **Cloudflare injects a script into the live page** (2026-10-10). The zone's
+  JavaScript Detections add an inline `<script>` that loads
+  `/cdn-cgi/challenge-platform/scripts/jsd/main.js`. Our CSP blocks it, so it
+  does nothing but log a console error, and it breaks the page's "no scripts"
+  claim. Bot Fight Mode, JavaScript Detections and Block AI bots were switched
+  off in the dashboard and the injection was still there minutes later. Next:
+  confirm the setting really took effect, then look for a per-hostname way to
+  turn it off. Avoid `Cache-Control: no-transform`, which also stops brotli.
+  Check with `curl -s https://yunan.dev/ | grep -c challenge-platform` (should be 0).
+
