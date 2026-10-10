@@ -40,7 +40,7 @@ jobs:
     # The Cloudflare token lives in this environment, which only main may deploy to.
     environment:
       name: production
-      url: https://yunan-dev.minty-f44.workers.dev
+      url: https://yunan.dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
