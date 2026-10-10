@@ -75,5 +75,6 @@ stylesheet working.
 
 Pushes to `main` build and deploy through GitHub Actions with
 `cloudflare/wrangler-action`. Pull requests build and check without
-deploying. Secrets: `CLOUDFLARE_API_TOKEN` (Workers deploy only) and
-`CLOUDFLARE_ACCOUNT_ID`.
+deploying. Credentials live in the `production` environment, which only
+`main` can deploy to: the secret `CLOUDFLARE_API_TOKEN` (Workers deploy only)
+and the variable `CLOUDFLARE_ACCOUNT_ID`.

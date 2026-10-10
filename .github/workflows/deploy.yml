@@ -37,6 +37,10 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # The Cloudflare token lives in this environment, which only main may deploy to.
+    environment:
+      name: production
+      url: https://yunan-dev.minty-f44.workers.dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -46,5 +50,6 @@ jobs:
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.149.0"  # assets-only Workers need wrangler 4
           command: deploy
