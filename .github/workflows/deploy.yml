@@ -31,6 +31,7 @@ jobs:
         with:
           name: dist
           path: dist
+          include-hidden-files: true  # .well-known/
           retention-days: 7
 
   deploy:
