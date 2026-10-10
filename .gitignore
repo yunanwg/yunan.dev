@@ -1,0 +1,10 @@
+# Author-time inputs: original photos, mark sources, the Fig. 1 profile. Only generated outputs are published.
+assets/
+# Build output
+dist/
+# Local tooling
+.claude/
+.wrangler/
+node_modules/
+.DS_Store
+__pycache__/

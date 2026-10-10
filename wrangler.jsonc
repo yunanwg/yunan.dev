@@ -1,0 +1,11 @@
+// Static assets only: no Worker code runs. Deployed by .github/workflows/deploy.yml.
+{
+  "name": "yunan-dev",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+  // The custom domain (yunan.dev) is added after the first deploy has been checked on workers.dev:
+  // "routes": [{ "pattern": "yunan.dev", "custom_domain": true }]
+}
