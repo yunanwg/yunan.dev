@@ -80,7 +80,10 @@ Chrome and Safari (26+) run the scroll-driven animations; Firefox (and Zen)
 don't yet, so there Fig. 6 is shown already exploded. Only Chromium highlights
 the current thumb tab (`:target-current`). Check forced colours (Windows
 contrast themes) after touching the marks or the cover: they drop author
-backgrounds, which is why the marks get `forced-color-adjust: none`. Anything that
+backgrounds, which is why the marks get `forced-color-adjust: none`. Print from Firefox too:
+it drops any SVG filled with a pattern (and text after it on the page), prints
+the screen's animation state, and ignores `break-after: avoid`; the print
+stylesheet works around all three. Anything that
 must work everywhere uses plain CSS, such as the thumb index, which is
 `position: sticky`. Respect `prefers-reduced-motion` and keep the print
 stylesheet working.
