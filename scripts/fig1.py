@@ -37,6 +37,28 @@ def smooth(values, k=2):
     return out
 
 
+def simplify(pts: list, eps: float, keep: set) -> set:
+    """Ramer-Douglas-Peucker: indices of the points to keep, the ones in `keep` included."""
+    out = set(keep)
+
+    def walk(a: int, b: int) -> None:
+        (x1, y1), (x2, y2) = pts[a], pts[b]
+        span = math.hypot(x2 - x1, y2 - y1) or 1
+        far, dist = None, eps
+        for i in range(a + 1, b):
+            x0, y0 = pts[i]
+            d = abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / span
+            if d > dist or i in keep:
+                far, dist = i, (float("inf") if i in keep else d)
+        if far is not None:
+            out.add(far)
+            walk(a, far)
+            walk(far, b)
+
+    walk(0, len(pts) - 1)
+    return out
+
+
 def main() -> None:
     require(DATA)
     data = json.loads(DATA.read_text())
@@ -51,7 +73,7 @@ def main() -> None:
     # day separators and named high points, revealed with the ride
     names = {p["day"]: p["name"] for p in data["peaks"]}
     starts = data["day_starts"] + [1.0]
-    marks = []
+    marks, keep = [], {0, len(pts) - 1}
     for i in range(data["days"]):
         x0, x1 = starts[i] * W, starts[i + 1] * W
         if i:
@@ -62,11 +84,16 @@ def main() -> None:
         if i + 1 in names:
             x = top[0] * W
             k = min(range(len(prof)), key=lambda n: abs(prof[n][0] - top[0]))
-            y = pts[k][1]
+            y = round(pts[k][1])
+            keep.add(k)  # the line must pass through every marked summit
             anchor = "end" if x > W - 60 else "middle"
             marks.append(f'<circle class="peak" cx="{x:.0f}" cy="{y}" r="2.2"/>'
                          f'<text class="peakl" x="{x:.0f}" y="{y - 15:.1f}" text-anchor="{anchor}">{names[i + 1]}</text>'
                          f'<text class="peakv" x="{x:.0f}" y="{y - 6:.1f}" text-anchor="{anchor}">{top[2]:,} m</text>')
+    # Simplify the line for the page: drop points within half a unit of it (about 8 m of height),
+    # keeping the summits, and draw on whole units.
+    pts = [(x, round(y)) for i, (x, y) in enumerate(pts) if i in simplify(pts, 0.5, keep)]
+
     # One shape for ground and line: the closing edges run outside the viewBox, so only the profile's stroke shows.
     ride = f"M{-PAD},{H + PAD} L" + " L".join(f"{x},{y}" for x, y in pts) + f" L{W + PAD},{H + PAD}Z"
 
@@ -101,8 +128,8 @@ def main() -> None:
             d = prof[j][0]
         # inset() is a share of the group's box, which runs from -PAD to W + PAD, not of the viewBox
         right = (W + PAD - d * W) / (W + 2 * PAD) * 100
-        stops.append(f"{t * 100:.4g}% {{ clip-path: inset(0 {right:.2f}% 0 0); }}")
-        walk.append(f"{t * 100:.4g}% {{ offset-distance: {along(d * W) * 100:.2f}%; }}")
+        stops.append(f"{t * 100:.4g}% {{ clip-path: inset(0 {right:.1f}% 0 0); }}")
+        walk.append(f"{t * 100:.4g}% {{ offset-distance: {along(d * W) * 100:.1f}%; }}")
 
     svg = (
         f'<svg viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMax slice" role="img" '
