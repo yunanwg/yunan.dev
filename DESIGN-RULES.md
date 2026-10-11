@@ -239,6 +239,15 @@ still state for browsers without the feature. The moves so far:
 4. **A position mark.** On wide screens a pair of short lichen ticks, one on
    each edge so the lettering stays clear, travels down the spine band with `scroll(root)`: where you are in the manual. Without scroll
    timelines there is no tick, rather than a wrong one.
+5. **A walker on Fig. 1.** A dot rides the profile during the load moment, on
+   the same clock as the reveal (CSS `offset-path`, one keyframe per reveal
+   stop), so it stays on the moving edge. It exists only while that moment
+   plays: hidden with reduced motion, in print, and where `offset-path` is
+   unsupported.
+6. **Plates print in.** As a plate scrolls into view its dots appear in
+   ordered-dither order, 16 passes of the 4 × 4 Bayer matrix, one mask cell per
+   plate pixel (`view()` timeline, masks as `data:` SVGs, so CSP allows
+   `img-src data:`). The still state is the whole photograph.
 
 Nothing else moves on its own.
 
