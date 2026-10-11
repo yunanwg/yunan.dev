@@ -87,15 +87,14 @@ deploying. Credentials live in the `production` environment, which only
 `main` can deploy to: the secret `CLOUDFLARE_API_TOKEN` (Workers deploy only)
 and the variable `CLOUDFLARE_ACCOUNT_ID`.
 
-## Known issues
+## Cloudflare zone notes
 
-- **Cloudflare injects a script into the live page** (2026-10-10). The zone's
-  JavaScript Detections add an inline `<script>` that loads
-  `/cdn-cgi/challenge-platform/scripts/jsd/main.js`. Our CSP blocks it, so it
-  does nothing but log a console error, and it breaks the page's "no scripts"
-  claim. Bot Fight Mode, JavaScript Detections and Block AI bots were switched
-  off in the dashboard and the injection was still there minutes later. Next:
-  confirm the setting really took effect, then look for a per-hostname way to
-  turn it off. Avoid `Cache-Control: no-transform`, which also stops brotli.
-  Check with `curl -s https://yunan.dev/ | grep -c challenge-platform` (should be 0).
-
+- **No injected scripts.** On the Free plan, turning Bot Fight Mode on once also
+  turns on JavaScript Detections, which inject a `<script>` from
+  `/cdn-cgi/challenge-platform/` into every HTML response; the dashboard can't
+  turn it off again. It was turned off through the API on 2026-10-11:
+  `PUT /zones/{zone_id}/bot_management` with `{"fight_mode":false,"enable_js":false}`,
+  using a short-lived token with Zone > Bot Management > Edit. Don't re-enable
+  Bot Fight Mode. Don't use `Cache-Control: no-transform` as a workaround: it
+  also stops compression (about 42 kB instead of 13.5 kB).
+  Check: `curl -s https://yunan.dev/ | grep -c challenge-platform` should print 0.
