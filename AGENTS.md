@@ -49,7 +49,10 @@ HTML is at about 12 of 14 kB, so new head tags or copy still need weighing.
   third-party requests from the reader's browser, no trackers. Server-side work
   (a Worker, build-time fetches, CI dependencies) is fine within R5.
 - Numbers must be measured or sourced (R4). Never invent one for a caption or
-  a datasheet row.
+  a datasheet row. Datasheet rows from the watch (vertical gain, locomotion,
+  sleep) are dated snapshots, not build-time reads: refresh them by hand from
+  Garmin (the author asks Claude through the Garmin connector), and update the
+  date in the row's conditions with the number.
 - Privacy: no coordinates, no EXIF, no companions' names, no employer
   internals (architectures, internal tool names, colleagues). Originals in
   `assets/` keep only their orientation tag: run `python3 scripts/strip.py` on
@@ -87,6 +90,25 @@ stylesheet works around all three. Anything that
 must work everywhere uses plain CSS, such as the thumb index, which is
 `position: sticky`. Respect `prefers-reduced-motion` and keep the print
 stylesheet working.
+
+## Commits
+
+[Conventional Commits](https://www.conventionalcommits.org/): `type: subject`
+in plain English, imperative, lower case after the colon, no trailing period.
+Release notes are grouped by type, so pick it by what the reader of the page
+would notice:
+
+| Type | For |
+|---|---|
+| `feat` | something new on the page (a figure, a section, a datasheet row) |
+| `fix` | something on the page that was wrong or broken |
+| `perf` | the same page, fewer bytes |
+| `docs` | AGENTS.md, DESIGN-RULES.md, README |
+| `build` | `build.py`, `measure.py` and the generators |
+| `ci` | workflows, Dependabot, deploy configuration |
+| `chore` | anything else |
+
+Commits are signed. No AI attribution trailers.
 
 ## Deploying
 
