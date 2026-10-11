@@ -139,7 +139,9 @@ no metadata. Images (plates and marks) count towards R5; plates load lazily.
   top, the Chinese name, the Latin name, one italic line, and
   the ride across the bottom edge with its figure caption on a lichen tag.
 - **L2. Spine band.** On screens ≥ 62 rem, a 3 rem spruce band runs down the
-  left edge, carrying the name and edition, set vertically.
+  left edge of the window (not of the text block), carrying the name and
+  edition, set vertically. It binds the left edge as the thumb tabs mark the
+  right; the text column stays aligned under the cover's.
 - **L3. Text column plus margin.** Running text in a 36 rem column; notes in
   the margin to its right on wide screens, inline with a moss rule on narrow
   ones. Wide elements (datasheets) span both.
@@ -194,7 +196,9 @@ in tabular monospace. Humour belongs here, stated as flatly as a real spec.
 **C7. Exploded view.** The page split into its parts (markup, styles, figures,
 fonts, scripts), each plate labelled with measured bytes, scripts included.
 The figure's accessible name carries the same numbers. Filled plates for
-parts the page carries, dashed for parts it doesn't. The caption gives the
+parts the page carries, dashed for parts it doesn't. Each part has its own
+ordered-dither density (4 × 4 Bayer, 2 to 8 of 16 dots), so the layers read
+apart in one ink. The caption gives the
 assembled, compressed total.
 
 **C8. (Parked with L6.) Record of changes, per page.** On a project page the record lists the
@@ -216,7 +220,8 @@ none in print:
    caption do not move.
 2. **One scroll-linked figure.** Fig. 6, the exploded view, explodes as it scrolls into view:
    plates start stacked and spread apart on a named `view-timeline` shared by
-   the whole figure. Only the plates move; labels and leader lines stay put.
+   the whole figure. Each row (plate, leader line, label) moves as one; labels
+   fade in once the rows have room, so stacked labels never overprint.
    Each plate's area is in proportion to the bytes it stands for (written by
    `scripts/measure.py`); an empty part keeps a dashed full-size outline.
 3. **Answers to the reader.** Hover, focus and `:target` changes transition in

@@ -32,11 +32,12 @@ npx wrangler@4 dev            # preview dist/ as Cloudflare serves it, with _hea
 - a character on the page is missing from the font subsets;
 - the GitHub API can't be read (a stale count must not ship; the last deploy stays up).
 
-The build also writes `sitemap.xml` and `.well-known/security.txt` (expiry renewed
+The build strips comments and CSS whitespace from the shipped page, so comment
+the source freely; the budget and Fig. 6 measure what ships. It also writes `sitemap.xml` and `.well-known/security.txt` (expiry renewed
 on every build). `robots.txt` welcomes search and AI answers and opts out of
 training (`Content-Signal: ai-train=no`, plus the training-only crawlers).
 The JSON-LD block in the head is data, not script: the budget check ignores it.
-HTML is at about 13.5 of 14 kB, so new head tags or copy need weighing.
+HTML is at about 12 of 14 kB, so new head tags or copy still need weighing.
 
 ## Editing the page
 

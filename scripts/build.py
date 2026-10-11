@@ -2,7 +2,8 @@
 """Build the site: site/ -> dist/, then refuse to ship if a rule is broken.
 
 1. Copy site/ to dist/ (the source is never modified).
-2. Check every character on the page is in the font subsets (fonts/subset.txt).
+2. Check every character on the page is in the font subsets (fonts/subset.txt),
+   then drop comments and CSS whitespace (the source keeps them for people).
 3. Read brilliant-CV's stars and contributors from the GitHub API.
 4. Give fonts and images content-hashed names, so they can be cached forever.
 5. Write sitemap.xml and .well-known/security.txt.
@@ -50,6 +51,18 @@ def check_glyphs(page: str) -> None:
     missing = sorted({ch for ch in text if ch.isprintable() and not ch.isspace() and ch not in subset})
     if missing:
         fail(f"characters not in the font subsets: {''.join(missing)!r}. Run python3 scripts/fonts.py")
+
+
+def minify(page: str) -> str:
+    """Comments and CSS indentation are for people reading site/; visitors don't download them.
+    Strings are left alone, and spaces around ":" are kept ("a :hover" is not "a:hover")."""
+    def css(m):
+        parts = re.split(r'("[^"]*"|\'[^\']*\')', re.sub(r"/\*.*?\*/", "", m.group(1), flags=re.S))
+        for i in range(0, len(parts), 2):
+            parts[i] = re.sub(r"\s*([{};,>])\s*", r"\1", re.sub(r"\s+", " ", parts[i])).replace(";}", "}")
+        return "<style>" + "".join(parts).strip() + "</style>"
+    page = re.sub(r"<!--.*?-->\s*", "", page, flags=re.S)
+    return re.sub(r"<style>(.*?)</style>", css, page, flags=re.S)
 
 
 def github(path: str):
@@ -112,6 +125,7 @@ def main() -> None:
     index = DIST / "index.html"
     page = index.read_text()
     check_glyphs(page)
+    page = minify(page)
     for key, val in counts().items():
         page, n = re.subn(rf'(data-m="{key}">)[^<]*(<)', rf"\g<1>{val}\g<2>", page)
         if n != 1:

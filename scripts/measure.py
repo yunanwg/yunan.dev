@@ -53,7 +53,7 @@ def size_plates(text: str, w: dict) -> str:
         hw, hh = 110 * s, 18 * s
         pts = f"{140 - hw:.1f},18 140,{18 - hh:.1f} {140 + hw:.1f},18 140,{18 + hh:.1f}"
         return f'{m.group(1)}points="{pts}"{m.group(3)}x1="{140 + hw:.1f}"'
-    return re.sub(r'(data-plate="(\w+)" style="[^"]*" )points="[^"]*"(/>\s*<line class="lead" data-lead )x1="[^"]*"', plate, text)
+    return re.sub(r'(data-plate="(\w+)" )points="[^"]*"(/>\s*<line class="lead" data-lead )x1="[^"]*"', plate, text)
 
 
 def fill(text: str, w: dict) -> str:

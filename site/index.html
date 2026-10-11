@@ -157,7 +157,8 @@ abbr { font-variant: all-small-caps; letter-spacing: .04em; text-decoration: non
 
 /* ---- Body: quiet paper, with a solid spine band on wide screens. */
 .body { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 62rem) { .body { grid-template-columns: 3rem minmax(0, 1fr); gap: 0 3rem; } }
+/* Wide screens: the spine binds the left edge of the window, as the tabs mark the right; the text stays under the cover's. */
+@media (min-width: 62rem) { .body { max-width: none; grid-template-columns: 3rem minmax(0, 1fr); gap: 0 3rem; } .main { width: 100%; max-width: 66rem; margin: 0 auto; } }
 .spine { display: none; }
 @media (min-width: 62rem) {
   .spine { display: block; background: var(--spruce); color: var(--lichen); }
@@ -265,29 +266,33 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
 
 /* ---- Fig. 2: the page, exploded. Plates start stacked and spread apart as the figure
    scrolls in, where supported. Labels never move, so every frame (and print) is legible. */
-.exploded { view-timeline: --fig2; display: block; width: 100%; max-width: 34rem; height: auto; color: var(--ink); }
+.exploded { view-timeline: --fig2; display: block; width: 100%; max-width: 36rem; height: auto; color: var(--ink); }
 .exploded text { font: 600 14px var(--cond); letter-spacing: .02em; fill: currentColor; }
 @media (max-width: 40rem) { .exploded text { font-size: 16px; } }
 .exploded .v { font-weight: 700; font-variant-numeric: tabular-nums; }
-.exploded .plate { fill: url(#dither); stroke: currentColor; stroke-width: 1.2; }
+.exploded .plate { stroke: currentColor; stroke-width: 1.2; }
+[data-plate=markup] { fill: url(#d1); } [data-plate=css] { fill: url(#d2); } [data-plate=svg] { fill: url(#d3); } [data-plate=fonts] { fill: url(#d4); } [data-plate=img] { fill: url(#d5); }
 .exploded .empty { fill: none; stroke: currentColor; stroke-dasharray: 3 3; opacity: .55; }
 .exploded .lead { stroke: currentColor; stroke-width: .8; opacity: .6; }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .exploded .p { animation: explode linear both; animation-timeline: --fig2; animation-range: entry 0% cover 50%; }
-    @keyframes explode { from { transform: translateY(var(--c)); } to { transform: none; } }
+    /* Each row (plate, leader, label) moves as one; labels fade in once the rows have room. */
+    .exploded .p, .exploded .p > :not(polygon) { animation: explode linear both; animation-timeline: --fig2; animation-range: entry 0% cover 50%; }
+    .exploded .p > :not(polygon) { animation-name: label; }
+    @keyframes explode { from { translate: 0 var(--c); } }
+    @keyframes label { 0%, 45% { opacity: 0; } }
   }
 }
 
 /* Pattern colours are resolved where the pattern is defined, so each colour gets its own. */
-.di rect, .dl rect { shape-rendering: crispEdges; }
-.di rect { fill: var(--ink); }
+.di path, .dl rect { shape-rendering: crispEdges; }
+.di path { fill: var(--ink); }
 .dl rect { fill: var(--lichen); }
 
 /* ---- Thumb index: solid tabs on the page edge. */
 .thumb { display: none; }
 @media (min-width: 62rem) {
-  .thumb { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; position: sticky; top: 35vh; height: 0; scroll-target-group: auto; z-index: 2; }
+  .thumb { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; position: sticky; top: 35vh; height: 0; translate: 0 1.5rem; scroll-target-group: auto; z-index: 2; }
   .thumb a { display: block; width: 2.3rem; padding: .45rem 0 .45rem .8rem; font: 600 1rem/1 var(--cond); text-decoration: none; background: var(--spruce); color: var(--lichen); border-radius: 6px 0 0 6px; }
   .thumb a:hover, .thumb a:is(:target-current) { background: var(--lichen); color: var(--spruce); width: 2.8rem; }
   .thumb a:focus-visible { outline-color: currentColor; outline-offset: -4px; }
@@ -318,7 +323,9 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
   a[href^="http"]::after { content: " <" attr(href) ">"; font: 8pt var(--sans); color: #444; }
   figure, .spec, .front, ol.parts li { break-inside: avoid; }
   /* Scroll timelines have no meaning on paper: print the exploded view fully exploded. */
-  .exploded .p, .cover svg * { animation: none !important; transform: none !important; }
+  .exploded .p, .exploded .p > *, .cover svg * { animation: none !important; }
+  .exploded .p { translate: none !important; }
+  .cover svg * { transform: none !important; }
   h2 { break-after: avoid; margin-top: 1.5rem; }
 }
 </style>
@@ -326,10 +333,12 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <!-- Ordered dither, 25% coverage: the house texture. -->
-    <pattern id="dither" class="di" width="4" height="4" patternUnits="userSpaceOnUse">
-      <rect width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="2" width="1" height="1" opacity=".5"/><rect y="2" width="1" height="1" opacity=".5"/>
-    </pattern>
+    <!-- Ordered dither (4 × 4 Bayer) at five densities, one per part in Fig. 6. -->
+    <pattern id="d1" class="di" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0h1v1h-1zM2 2h1v1h-1z"/></pattern>
+    <pattern id="d2" class="di" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0h1v1h-1zM2 0h1v1h-1zM2 2h1v1h-1z"/></pattern>
+    <pattern id="d3" class="di" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0h1v1h-1zM2 0h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1z"/></pattern>
+    <pattern id="d4" class="di" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 3h1v1h-1z"/></pattern>
+    <pattern id="d5" class="di" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z"/></pattern>
     <pattern id="dither-l" class="dl" width="4" height="4" patternUnits="userSpaceOnUse">
       <rect width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="2" width="1" height="1" opacity=".5"/><rect y="2" width="1" height="1" opacity=".5"/>
     </pattern>
@@ -409,7 +418,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
           <tr><th scope="row">Single-day range</th><td>200</td><td>km</td><td>Self-supported, gravel, small roads</td></tr>
           <tr><th scope="row">Languages</th><td>5</td><td>—</td><td>Teochew, Cantonese, Mandarin, French (C2), English</td></tr>
           <tr><th scope="row">Open ports</th><td>0</td><td>—</td><td>Homelab, all ingress via tunnel</td></tr>
-          <tr><th scope="row">Page weight</th><td><span data-m="total">46.8</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build</td></tr>
+          <tr><th scope="row">Page weight</th><td><span data-m="total">47.1</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build</td></tr>
           <tr><th scope="row">Fuel</th><td>1 to 5</td><td>coffees/day</td><td>Peaks before a Salesforce deployment</td></tr>
           <tr><th scope="row">Song loop, max</th><td>14</td><td>plays</td><td>One Wu Bai song, earphones dead, 70 km from home</td></tr>
           <tr><th scope="row">Exit status</th><td>0</td><td>—</td><td>Unless invoked with npm</td></tr>
@@ -453,34 +462,34 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <p>This page is one <abbr>HTML</abbr> file, two font subsets, <span data-m="plates">four</span> dithered photographs and no scripts. Running text is set in your system's own serif. Labels are set in Barlow Condensed, and the name in Noto Serif SC cut down to its three characters, both under the SIL Open Font License. Fig. 1 is drawn from my watch's records of the walk, with elevation from a public terrain model. Every number in Fig. 6 is measured when the page is built.</p>
     <p>Borrowed, with thanks: dithered photographs and a page that admits its own weight, from <a href="https://solar.lowtechmagazine.com/">Low-tech Magazine</a>'s solar edition; the byte budget, from Maciej Cegłowski's talk <a href="https://idlewords.com/talks/website_obesity.htm">The Website Obesity Crisis</a>; notes in the margin, from <a href="https://gwern.net/">gwern.net</a>; and the wish for a page that lasts, from the <a href="https://permacomputing.net/principles/">permacomputing principles</a>.</p>
     <figure>
-      <svg class="exploded" viewBox="20 0 490 276" role="img" aria-labelledby="fig2-t">
-        <title id="fig2-t" data-m="f2title">Exploded view of this page, parts unpacked: markup 12,654 bytes, styles 18,586, figures 9,675, fonts 12,796, images 20,585, scripts 0.</title>
-        <g transform="translate(0,6)">
-          <polygon class="plate p" data-plate="markup" style="--c:110px" points="53.8,18 140,3.9 226.2,18 140,32.1"/>
+      <svg class="exploded" viewBox="20 0 520 276" role="img" aria-labelledby="fig2-t">
+        <title id="fig2-t" data-m="f2title">Exploded view of this page, parts unpacked: markup 12,654 bytes, styles 19,262, figures 10,283, fonts 12,796, images 20,585, scripts 0.</title>
+        <g transform="translate(0,6)" class="p" style="--c:110px">
+          <polygon class="plate" data-plate="markup" points="53.8,18 140,3.9 226.2,18 140,32.1"/>
           <line class="lead" data-lead x1="226.2" y1="18" x2="300" y2="18"/><text x="308" y="22">Markup</text><text class="v" x="402" y="22" text-anchor="end" data-m="markup">12,654</text><text x="406" y="22">B</text>
         </g>
-        <g transform="translate(0,50)">
-          <polygon class="plate p" data-plate="css" style="--c:66px" points="35.5,18 140,0.9 244.5,18 140,35.1"/>
-          <line class="lead" data-lead x1="244.5" y1="18" x2="300" y2="18"/><text x="308" y="22">Styles</text><text class="v" x="402" y="22" text-anchor="end" data-m="css">18,586</text><text x="406" y="22">B</text>
+        <g transform="translate(0,50)" class="p" style="--c:66px">
+          <polygon class="plate" data-plate="css" points="33.6,18 140,0.6 246.4,18 140,35.4"/>
+          <line class="lead" data-lead x1="246.4" y1="18" x2="300" y2="18"/><text x="308" y="22">Styles</text><text class="v" x="402" y="22" text-anchor="end" data-m="css">19,262</text><text x="406" y="22">B</text>
         </g>
-        <g transform="translate(0,94)">
-          <polygon class="plate p" data-plate="svg" style="--c:22px" points="64.6,18 140,5.7 215.4,18 140,30.3"/>
-          <line class="lead" data-lead x1="215.4" y1="18" x2="300" y2="18"/><text x="308" y="22">Figures</text><text class="v" x="402" y="22" text-anchor="end" data-m="svg">9,675</text><text x="406" y="22">B</text>
+        <g transform="translate(0,94)" class="p" style="--c:22px">
+          <polygon class="plate" data-plate="svg" points="62.3,18 140,5.3 217.7,18 140,30.7"/>
+          <line class="lead" data-lead x1="217.7" y1="18" x2="300" y2="18"/><text x="308" y="22">Figures</text><text class="v" x="402" y="22" text-anchor="end" data-m="svg">10,283</text><text x="406" y="22">B</text>
         </g>
-        <g transform="translate(0,138)">
-          <polygon class="plate p" data-plate="fonts" style="--c:-22px" points="53.3,18 140,3.8 226.7,18 140,32.2"/>
+        <g transform="translate(0,138)" class="p" style="--c:-22px">
+          <polygon class="plate" data-plate="fonts" points="53.3,18 140,3.8 226.7,18 140,32.2"/>
           <line class="lead" data-lead x1="226.7" y1="18" x2="300" y2="18"/><text x="308" y="22">Fonts</text><text class="v" x="402" y="22" text-anchor="end" data-m="fonts">12,796</text><text x="406" y="22">B, two subsets</text>
         </g>
-        <g transform="translate(0,182)">
-          <polygon class="plate p" data-plate="img" style="--c:-66px" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
+        <g transform="translate(0,182)" class="p" style="--c:-66px">
+          <polygon class="plate" data-plate="img" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
           <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Images</text><text class="v" x="402" y="22" text-anchor="end" data-m="img">20,585</text><text x="406" y="22">B, <tspan data-m="plates">four</tspan> plates, <tspan data-m="marks">two</tspan> marks</text>
         </g>
-        <g transform="translate(0,226)">
-          <polygon class="empty p" data-plate="js" style="--c:-110px" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
+        <g transform="translate(0,226)" class="p" style="--c:-110px">
+          <polygon class="empty" data-plate="js" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
           <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Scripts</text><text class="v" x="402" y="22" text-anchor="end" data-m="js">0</text><text x="406" y="22">B</text>
         </g>
       </svg>
-      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">46.8</span> kB; a server using brotli sends less.</figcaption>
+      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">47.1</span> kB; a server using brotli sends less.</figcaption>
     </figure>
 
     <h2 id="contact"><span class="n">6</span> Contact</h2>
