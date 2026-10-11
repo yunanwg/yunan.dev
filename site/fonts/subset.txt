@@ -1,2 +1,2 @@
-barlow-condensed-600	 !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~°×Þèéóöł‑–—†−
+barlow-condensed-600	 !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~°×Þèéóöł‑–—−
 noto-serif-sc-700-name	楠煜王

@@ -5,8 +5,10 @@
 2. Check every character on the page is in the font subsets (fonts/subset.txt),
    then drop comments and CSS whitespace (the source keeps them for people).
 3. Read brilliant-CV's stars and contributors from the GitHub API.
-4. Give fonts and images content-hashed names, so they can be cached forever.
+4. Stamp the colophon with the build date and source commit.
+   Give fonts and images content-hashed names, so they can be cached forever.
 5. Write sitemap.xml and .well-known/security.txt.
+   Write yunan.1, the page as a man page (scripts/manpage.py).
 6. Weigh the page, write the numbers in, and gate on the R5 budget.
 
 Standard library only. GITHUB_TOKEN, if set, raises the API rate limit.
@@ -25,6 +27,7 @@ import sys
 import urllib.request
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import manpage  # noqa: E402
 import measure  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -84,6 +87,25 @@ def counts() -> dict:
     return {"stars": f"{repo['stargazers_count']:,}", "contributors": last.group(1) if last else "1"}
 
 
+def imprint(page: str) -> str:
+    """The colophon's "Printed <date> from <commit>": the build date and the commit it was built from."""
+    sha = os.environ.get("GITHUB_SHA") or subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        fail("can't tell which commit this page is built from")
+    today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    page, n = re.subn(r'(data-m="printed">)[^<]*', rf"\g<1>{today}", page)
+    page, m = re.subn(r'<a data-m="commit" href="[^"]*">[^<]*</a>',
+                      f'<a data-m="commit" href="https://github.com/yunanwg/yunan.dev/commit/{sha}">{sha[:7]}</a>', page)
+    if n != 1 or m != 1:
+        fail("expected one printed date and one commit link in the colophon")
+    return page
+
+
+def imprint_date(page: str) -> str:
+    return re.search(r'data-m="printed">([^<]*)', page).group(1)
+
+
 def hash_assets(page: str) -> str:
     for path in sorted([*DIST.glob("fonts/*.woff2"), *DIST.glob("img/*.webp")]):
         rel = path.relative_to(DIST).as_posix()
@@ -130,6 +152,7 @@ def main() -> None:
         page, n = re.subn(rf'(data-m="{key}">)[^<]*(<)', rf"\g<1>{val}\g<2>", page)
         if n != 1:
             fail(f'expected one data-m="{key}" in the page, found {n}')
+    page = imprint(page)
     page = hash_assets(page)
     unhashed = re.findall(r'"((?:fonts|img)/[^"]+)"', page)
     unhashed = [u for u in unhashed if not re.search(r"\.[0-9a-f]{10}\.\w+$", u)]
@@ -138,7 +161,9 @@ def main() -> None:
     index.write_text(page)
     well_known()
     w = measure.process(index)
+    man = manpage.write(DIST, imprint_date(page))
     print(f"dist/index.html: HTML {w['gz']:,} B gzip, fonts {w['fonts']:,} B, images {w['img']:,} B")
+    print(f"dist/yunan.1: {man:,} B, the same manual for a terminal")
     measure.report(w)
 
 

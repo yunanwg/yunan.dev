@@ -65,8 +65,8 @@ def main() -> None:
             marks.append(f'<circle class="peak" cx="{x:.0f}" cy="{y}" r="2.2"/>'
                          f'<text class="peakl" x="{x:.0f}" y="{y - 15:.1f}" text-anchor="{anchor}">{names[i + 1]}</text>'
                          f'<text class="peakv" x="{x:.0f}" y="{y - 6:.1f}" text-anchor="{anchor}">{top[2]:,} m</text>')
-    line = "M" + " L".join(f"{x},{y}" for x, y in pts)
-    area = f"0,{H} " + " ".join(f"{x},{y}" for x, y in pts) + f" {W},{H}"
+    # One shape for ground and line: the closing edges run outside the viewBox, so only the profile's stroke shows.
+    ride = f"M-10,{H + 10} L" + " L".join(f"{x},{y}" for x, y in pts) + f" L{W + 10},{H + 10}Z"
 
     # time share -> distance share, sampled at even time steps
     stops = []
@@ -87,8 +87,7 @@ def main() -> None:
         f'aria-label="Elevation profile of the Tour du Mont Blanc, {data["garmin_distance_km"]:.0f} km over '
         f'{data["days"]} days, from {lo:.0f} to {hi:.0f} metres">\n'
         f'      <g class="ride-g">\n'
-        f'      <polygon points="{area}" fill="url(#dither-l)" class="ride-fill"/>\n'
-        f'      <path class="ride" d="{line}" fill="none" stroke="currentColor" stroke-width="1.6" '
+        f'      <path d="{ride}" fill="url(#dither-l)" stroke="currentColor" stroke-width="1.6" '
         f'stroke-linejoin="round" vector-effect="non-scaling-stroke"/>\n'
         f'      <g class="ride-marks" aria-hidden="true">{"".join(marks)}</g>\n'
         f'      </g>\n    </svg>'

@@ -9,9 +9,14 @@ if the page later uses a character the font doesn't have.
 - Barlow Condensed 600 (labels): printable ASCII plus every other non-CJK
   character found in the page, so any English label works.
 - Noto Serif SC 700 (the name): exactly the CJK characters in the page.
-Run: python3 scripts/fonts.py
+
+Google's subset keeps every OpenType feature and adds accented letters reachable
+through them (fractions, ~50 composites). fontTools then keeps only the requested
+characters and the features the page uses: about a quarter off Barlow.
+Needs fontTools (author time only). Run: python3 scripts/fonts.py
 """
 import html
+import io
 import pathlib
 import re
 import urllib.parse
@@ -22,6 +27,8 @@ PAGE = ROOT / "site/index.html"
 FONTS = ROOT / "site/fonts"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 ASCII = "".join(chr(c) for c in range(0x20, 0x7F))
+# kern and liga are on by default; tnum is asked for by the datasheet and Fig. 6.
+FEATURES = {"barlow-condensed-600.woff2": ["kern", "liga", "tnum"], "noto-serif-sc-700-name.woff2": []}
 
 
 def is_cjk(ch: str) -> bool:
@@ -39,8 +46,27 @@ def fetch(family: str, chars: str, out: str) -> int:
     font_url = re.search(r"url\((https://[^)]+)\)", css).group(1)
     data = urllib.request.urlopen(urllib.request.Request(font_url, headers={"User-Agent": UA}), timeout=30).read()
     assert data[:4] == b"wOF2", "expected a WOFF2 file"
+    data = prune(data, chars, FEATURES[out])
     (FONTS / out).write_bytes(data)
     return len(data)
+
+
+def prune(data: bytes, chars: str, features: list[str]) -> bytes:
+    """Keep only these characters and features. Name records (copyright, licence) stay."""
+    try:
+        from fontTools import subset
+        from fontTools.ttLib import TTFont
+    except ImportError:
+        raise SystemExit("fonts.py needs fontTools: pip install fonttools brotli")
+    opts = subset.Options()
+    opts.flavor, opts.layout_features = "woff2", features
+    opts.drop_tables += ["BASE", "STAT", "vhea", "vmtx"]  # vertical and variable-font data the page never uses
+    font = TTFont(io.BytesIO(data))
+    sub = subset.Subsetter(opts)
+    sub.populate(text=chars)
+    sub.subset(font)
+    buf = io.BytesIO(); font.save(buf)
+    return buf.getvalue()
 
 
 def main() -> None:

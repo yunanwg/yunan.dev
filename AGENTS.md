@@ -12,7 +12,7 @@ site/            what ships: index.html, 404.html, _headers, fonts/, img/
 scripts/         build.py and the author-time generators
 assets/          git-ignored author inputs, never published: original photos
                  (metadata stripped), mark sources, tmb-profile.json for Fig. 1
-wrangler.jsonc   Cloudflare Workers static assets, no Worker code
+wrangler.jsonc   Cloudflare Workers static assets (no Worker code yet; one is allowed, see R5)
 .github/workflows/deploy.yml   build on every push and PR, deploy from main, weekly rebuild
 ```
 
@@ -33,7 +33,8 @@ npx wrangler@4 dev            # preview dist/ as Cloudflare serves it, with _hea
 - the GitHub API can't be read (a stale count must not ship; the last deploy stays up).
 
 The build strips comments and CSS whitespace from the shipped page, so comment
-the source freely; the budget and Fig. 6 measure what ships. It also writes `sitemap.xml` and `.well-known/security.txt` (expiry renewed
+the source freely; the budget and Fig. 6 measure what ships. It also writes `yunan.1`, the page as a man page (`scripts/manpage.py`; read it with
+`curl -sO https://yunan.dev/yunan.1 && man ./yunan.1`), `sitemap.xml` and `.well-known/security.txt` (expiry renewed
 on every build). `robots.txt` welcomes search and AI answers and opts out of
 training (`Content-Signal: ai-train=no`, plus the training-only crawlers).
 The JSON-LD block in the head is data, not script: the budget check ignores it.
@@ -44,8 +45,9 @@ HTML is at about 12 of 14 kB, so new head tags or copy still need weighing.
 - `site/index.html` is the only source of copy. Edit it directly.
 - Elements with `data-m="..."` are written by the build (sizes, counts). Don't
   hand-edit their values.
-- Inline everything except fonts and images. No JavaScript, no third-party
-  requests, no trackers.
+- Inline everything except fonts and images. No JavaScript in the page, no
+  third-party requests from the reader's browser, no trackers. Server-side work
+  (a Worker, build-time fetches, CI dependencies) is fine within R5.
 - Numbers must be measured or sourced (R4). Never invent one for a caption or
   a datasheet row.
 - Privacy: no coordinates, no EXIF, no companions' names, no employer
@@ -66,16 +68,19 @@ and their outputs are committed.
 | `scripts/icons.py` | `site/favicon.ico`, `favicon-96.png`, `apple-touch-icon.png` from the Fig. 2 ibex (needs Pillow) | the icon changes |
 | `scripts/og.py` | `site/og.png`, the link preview: the cover's name beside Fig. 2 (needs Pillow and Chrome) | the cover or Fig. 2 changes |
 | `scripts/strip.py` | strips a JPEG's metadata in place, losslessly | a new original lands in `assets/` |
-| `scripts/fonts.py` | `site/fonts/*.woff2`, `site/fonts/subset.txt` | the build reports a missing character |
+| `scripts/fonts.py` | `site/fonts/*.woff2`, `site/fonts/subset.txt` (needs fontTools) | the build reports a missing character |
 
-`fonts.py` asks the Google Fonts CSS2 API for a server-side subset (`text=`)
+`fonts.py` asks the Google Fonts CSS2 API for a server-side subset (`text=`),
+then keeps only the OpenType features the page uses (Barlow: kern, liga, tnum),
 and self-hosts the result. Visitors never contact Google.
 
 ## Browser support
 
-Chrome and Safari get the scroll-linked extras. Firefox (and Zen) don't yet
-support scroll-driven animations or `:target-current`, so there Fig. 6 is shown
-already exploded and the current thumb tab isn't highlighted. Anything that
+Chrome and Safari (26+) run the scroll-driven animations; Firefox (and Zen)
+don't yet, so there Fig. 6 is shown already exploded. Only Chromium highlights
+the current thumb tab (`:target-current`). Check forced colours (Windows
+contrast themes) after touching the marks or the cover: they drop author
+backgrounds, which is why the marks get `forced-color-adjust: none`. Anything that
 must work everywhere uses plain CSS, such as the thumb index, which is
 `position: sticky`. Respect `prefers-reduced-motion` and keep the print
 stylesheet working.

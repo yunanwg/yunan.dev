@@ -41,6 +41,12 @@ Units: B for bytes, kB = 1000 B, gzip level 9 (a brotli host sends less).
 the budget, so an over-budget page is never deployed. The check has been shown
 to fail with a lowered budget, so it is real.
 
+The limits are on what the reader's browser downloads and runs. Work on our
+side is not limited by them: a Worker, a database, build-time fetches and CI
+dependencies are all allowed, as long as the shipped page stays inside the
+table above, the reader's browser still runs no script, and it never contacts
+a third party.
+
 ## Colour
 
 Solid colours only, from the outdoor side of the palette. No red, no
@@ -73,8 +79,8 @@ Three voices, each with one job.
 | Voice | Family | Cost | Used for |
 |---|---|---|---|
 | Reading | System serif: Iowan Old Style, Charter, Palatino, Georgia | 0 B | All running text |
-| Labelling | Barlow Condensed 600, ASCII subset | 10.7 KB | The Latin name, section numbers, captions' figure labels, table headers, cover metadata, thumb tabs, spine |
-| Name | Noto Serif SC 700, cut to 王煜楠 | 1.6 KB | The Chinese name, nowhere else |
+| Labelling | Barlow Condensed 600, ASCII subset | 8.0 KB | The Latin name, section numbers, captions' figure labels, table headers, cover metadata, thumb tabs, spine |
+| Name | Noto Serif SC 700, cut to 王煜楠 | 1.2 KB | The Chinese name, nowhere else |
 | Data | System monospace | 0 B | Datasheet rows only |
 
 - **T1. Body is never a web font.** Reading text costs nothing and looks native.
@@ -143,8 +149,10 @@ no metadata. Images (plates and marks) count towards R5; plates load lazily.
   edition, set vertically. It binds the left edge as the thumb tabs mark the
   right; the text column stays aligned under the cover's.
 - **L3. Text column plus margin.** Running text in a 36 rem column; notes in
-  the margin to its right on wide screens, inline with a moss rule on narrow
-  ones. Wide elements (datasheets) span both.
+  the margin to its right on wide screens, each starting on the line of its
+  own superscript (anchor positioning; without it, beside its paragraph),
+  inline with a moss rule on narrow ones. A new note needs its pair of
+  `anchor-name` / `position-anchor` rules. Wide elements (datasheets) span both.
 - **L4. Thumb index.** Solid spruce tabs fixed to the right edge on wide
   screens. Plain links everywhere; where the browser supports
   `:target-current`, the tab for the section being read turns lichen. Always
@@ -207,9 +215,11 @@ paraphrased from memory.
 
 ## Motion
 
-**M1. Motion is rationed.** The site is a manual, and manuals mostly sit still.
-Exactly these may move, all under `prefers-reduced-motion: no-preference`,
-none in print:
+**M1. Motion is paid for in bytes.** A move earns its place by showing something
+true (a pace, a size, a position), and its cost comes out of R5 like any other
+part of the page. New moves are welcome on those terms. All of them run under
+`prefers-reduced-motion: no-preference`, none in print, and each has a complete
+still state for browsers without the feature. The moves so far:
 
 1. **One load moment.** Fig. 1 is the real Tour du Mont Blanc (June 2025,
    149 km, 8 days), and one edge reveals it left to right at the pace it was
