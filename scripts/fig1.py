@@ -15,6 +15,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGE = ROOT / "site/index.html"
 DATA = ROOT / "assets/tmb-profile.json"
 W, H, TOP = 1200, 140, 46     # viewBox, and headroom above the highest point for labels
+PAD = 10                      # the closing edges of the ride run this far outside the viewBox
 DURATION_S = 12               # the whole route, compressed
 STOPS = 60                    # keyframe stops along the time axis
 
@@ -66,7 +67,7 @@ def main() -> None:
                          f'<text class="peakl" x="{x:.0f}" y="{y - 15:.1f}" text-anchor="{anchor}">{names[i + 1]}</text>'
                          f'<text class="peakv" x="{x:.0f}" y="{y - 6:.1f}" text-anchor="{anchor}">{top[2]:,} m</text>')
     # One shape for ground and line: the closing edges run outside the viewBox, so only the profile's stroke shows.
-    ride = f"M-10,{H + 10} L" + " L".join(f"{x},{y}" for x, y in pts) + f" L{W + 10},{H + 10}Z"
+    ride = f"M{-PAD},{H + PAD} L" + " L".join(f"{x},{y}" for x, y in pts) + f" L{W + PAD},{H + PAD}Z"
 
     # time share -> distance share, sampled at even time steps
     stops = []
@@ -80,7 +81,9 @@ def main() -> None:
             d = a[0] + (b[0] - a[0]) * (t - a[1]) / (b[1] - a[1])
         else:
             d = prof[j][0]
-        stops.append(f"{t * 100:.4g}% {{ clip-path: inset(0 {max(0, 100 - d * 100):.2f}% 0 0); }}")
+        # inset() is a share of the group's box, which runs from -PAD to W + PAD, not of the viewBox
+        right = (W + PAD - d * W) / (W + 2 * PAD) * 100
+        stops.append(f"{t * 100:.4g}% {{ clip-path: inset(0 {right:.2f}% 0 0); }}")
 
     svg = (
         f'<svg viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMax slice" role="img" '
