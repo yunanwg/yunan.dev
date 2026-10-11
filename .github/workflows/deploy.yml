@@ -88,6 +88,8 @@ jobs:
           path: dist
       - name: Package the edition
         run: |
+          # checkout turns an annotated tag into a lightweight one; fetch the real tag for its message
+          git fetch --force origin "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
           tar -czf "yunan.dev-${GITHUB_REF_NAME}.tar.gz" -C dist .
           cp dist/yunan.1 yunan.1
           python3 scripts/release_notes.py "$GITHUB_REF_NAME" > notes.md
