@@ -246,12 +246,14 @@ abbr { font-variant: all-small-caps; letter-spacing: .04em; text-decoration: non
 }
 .main { padding: 2.5rem 1.25rem 4rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 2.5rem; align-content: start; }
 .main > .note { align-self: start; }
-.main > * { grid-column: 1; max-width: 38rem; }
-.main > .wide { max-width: none; }
+/* A route leg groups its heading and plates for print; on screen it is not a box at all. */
+.leg { display: contents; }
+:is(.main, .leg) > * { grid-column: 1; max-width: 38rem; }
+:is(.main, .leg) > .wide { max-width: none; }
 @media (min-width: 62rem) {
   .main { grid-template-columns: 36rem minmax(0, 1fr); }
   .main > .note { grid-column: 2; }
-  .main > .wide { grid-column: 1 / -1; }
+  :is(.main, .leg) > .wide { grid-column: 1 / -1; }
 }
 /* Between 62 and 76rem the fixed thumb index would sit on the content: reserve its gutter. */
 @media (min-width: 62rem) and (max-width: 76rem) { .main { padding-right: 3.5rem; } }
@@ -341,12 +343,12 @@ figcaption b { color: var(--ink); font: 600 .95rem var(--cond); letter-spacing: 
 /* Placement, not a gallery: one large plate per route against one small or tall one in the margin.
    The only overlap on the page is Fig. 3, laid on the corner of Fig. 2 with a ring of page paper. */
 @media screen and (min-width: 62rem) {
-  .main > .plate-side { grid-column: 2; align-self: start; margin-top: 9rem; }
-  .main > .plate-tall { grid-column: 2; grid-row-end: span 4; align-self: start; margin: -1.2rem 0 -6rem; }
+  :is(.main, .leg) > .plate-side { grid-column: 2; align-self: start; margin-top: 9rem; }
+  :is(.main, .leg) > .plate-tall { grid-column: 2; grid-row-end: span 4; align-self: start; margin: -1.2rem 0 -6rem; }
 }
 /* The overlap needs a margin wide enough for Fig. 3 to clear Fig. 2's caption. */
 @media screen and (min-width: 80rem) {
-  .main > .plate-over { margin: 18rem 0 0 -4rem; z-index: 1; }
+  :is(.main, .leg) > .plate-over { margin: 18rem 0 0 -4rem; z-index: 1; }
   .plate-over img { box-shadow: 0 0 0 .5rem var(--paper); }
   .plate-lead figcaption { max-width: 27rem; }
 }
@@ -429,7 +431,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
   .cover svg { height: auto; aspect-ratio: 1200 / 140; }
   .cover figcaption { margin: .3rem 0 0; padding: 0; color: #444; }
   .body, .main { display: block; padding: 0; }
-  .main > * { max-width: none; }
+  :is(.main, .leg) > * { max-width: none; }
   .note { border-left: 1px solid #000; padding-left: .5rem; }
   a[href^="http"]::after { content: " <" attr(href) ">"; font: 8pt var(--sans); color: #444; }
   figure, .spec, .front, ol.parts li { break-inside: avoid; }
@@ -437,12 +439,36 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
   .exploded .p, .exploded .p > *, .cover svg * { animation: none !important; }
   .exploded .p { translate: none !important; }
   .cover svg * { transform: none !important; }
-  h2 { break-after: avoid; margin-top: 1.5rem; }
+  h2, h3 { break-after: avoid; } h2 { margin-top: 1.5rem; }
   p, li { orphans: 3; widows: 3; }
   /* The marks are painted as backgrounds, which Firefox leaves out of print by default. */
   .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Firefox prints the screen's animation state: show every drawing and plate whole. */
+  .cover .ride-g { clip-path: none !important; }
+  .plate img { mask: none !important; animation: none !important; }
+  /* Keep a route's heading with its plates, and short paragraphs whole (Firefox ignores orphans). */
+  .leg { display: block; break-inside: avoid; }
+  h2, h3 { break-inside: avoid; }
+  /* Smaller on paper, so a route and its plates fit one page. */
+  .plate { width: calc(var(--w) * .6); }
+  p, li { break-inside: avoid; }
+  /* Firefox prints nothing of an SVG filled with a pattern, and loses text after it on the same page.
+     On paper the dithers become flat greys, still one step darker per part. */
+  .cover svg path { fill: #e4e4e4; }
+  [data-plate=markup] { fill: #f0f0f0; } [data-plate=css] { fill: #e0e0e0; } [data-plate=svg] { fill: #d0d0d0; }
+  [data-plate=fonts] { fill: #c0c0c0; } [data-plate=img] { fill: #b0b0b0; }
 }
 /* Readers who ask for more contrast get darker secondary text and rules. */
+/* Firefox print: it drops the mark's mask and fills the box, so leave the mark out; it ignores
+   break-after: avoid and mishandles a leg kept whole, so each heading carries an invisible reserve
+   below it and moves to the next page when the reserve doesn't fit. */
+@supports (-moz-appearance: none) { @media print {
+  .mark { display: none; }
+  .leg { break-inside: auto; }
+  h2 { display: block; } h2 .n { margin-right: .5rem; }
+  h2::after, h3::after { content: ""; display: block; height: 6rem; margin-bottom: -6rem; }
+  h3::after { height: 16rem; margin-bottom: -16rem; }
+} }
 @media (prefers-contrast: more) { :root { --dim: var(--ink); --rule: var(--ink); } }
 /* Forced colours (Windows contrast themes) drop author backgrounds and leave SVG fills alone:
    give the masked marks and the cover drawing the system text colour. */
@@ -541,6 +567,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <h2 id="terrain"><span class="n">4</span> Terrain</h2>
     <p>Gravel, mostly self-supported and mostly on small roads. Multi-day hikes from the Dolomites to the GR441 through the Auvergne volcanoes. Next: the Iceland Divide, by bike.</p>
 
+    <section class="leg">
     <h3 class="route"><span class="k">4.1</span> Tour du Mont Blanc</h3>
     <p class="route-spec">June 2025, solo. 8 days on foot, 149 km, +7,837 m. Profile on the cover.</p>
     <figure class="plate plate-lead" id="fig-2">
@@ -553,7 +580,8 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
       <img src="img/day5-grand-col-ferret.webp" width="288" height="326" loading="lazy" decoding="async" alt="A steep valley with long patches of old snow running down to a stream.">
       <figcaption><b>Fig. 3.</b> Day 5, climbing towards the Grand Col Ferret through the last of the snow.</figcaption>
     </figure>
-
+    </section>
+    <section class="leg">
     <h3 class="route"><span class="k">4.2</span> Laugavegur, Iceland</h3>
     <p class="route-spec">17–19 July 2025. 3 days on foot from Landmannalaugar to Þórsmörk, 58 km, +1,810 m.</p>
     <figure class="plate plate-tall" id="fig-4">
@@ -561,7 +589,8 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
       <img src="img/laugavegur-day3.webp" width="400" height="442" loading="lazy" decoding="async" alt="A hiker sits cross-legged on bare rock above a fast grey river in a gorge. Moss covers the cliffs; a glacier lies on the far mountains.">
       <figcaption><b>Fig. 4.</b> The last day, a rest above the river. Moss, rock and, on the horizon, ice.</figcaption>
     </figure>
-
+    </section>
+    <section class="leg">
     <h3 class="route"><span class="k">4.3</span> Pommes de Terre Salées</h3>
     <p class="route-spec">24 May 2025. A 200 km gravel brevet from the edge of Paris to the sea at Mers-les-Bains, 205 km, +2,076 m, 11 h 20 min in one day.</p>
     <figure class="plate plate-small" id="fig-5">
@@ -569,7 +598,9 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
       <figcaption><b>Fig. 5.</b> Around noon. One tree, one road, a long way still to the sea.</figcaption>
     </figure>
 
-    <h2 id="colophon"><span class="n">5</span> Colophon</h2>
+    
+    </section>
+<h2 id="colophon"><span class="n">5</span> Colophon</h2>
     <p>This page is one <abbr>HTML</abbr> file, two font subsets, <span data-m="plates">four</span> dithered photographs and no scripts. Running text is set in your system's own serif. Labels are set in Barlow Condensed, and the name in Noto Serif SC cut down to its three characters, both under the SIL Open Font License. Fig. 1 is drawn from my watch's records of the walk, with elevation from a public terrain model. Every number in Fig. 6 is measured when the page is built.</p>
     <p>Borrowed, with thanks: dithered photographs and a page that admits its own weight, from <a href="https://solar.lowtechmagazine.com/">Low-tech Magazine</a>'s solar edition; the byte budget, from Maciej Cegłowski's talk <a href="https://idlewords.com/talks/website_obesity.htm">The Website Obesity Crisis</a>; notes in the margin, from <a href="https://gwern.net/">gwern.net</a>; and the wish for a page that lasts, from the <a href="https://permacomputing.net/principles/">permacomputing principles</a>.</p>
     <figure>
