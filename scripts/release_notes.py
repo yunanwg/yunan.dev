@@ -31,7 +31,9 @@ def main(tag: str) -> None:
         span = f"{previous}..{tag}"
     except subprocess.CalledProcessError:
         previous, span = None, tag
-    annotation = git("tag", "-l", "--format=%(contents:body)", tag) or git("tag", "-l", "--format=%(contents:subject)", tag)
+    title = git("tag", "-l", "--format=%(contents:subject)", tag)
+    body = git("tag", "-l", "--format=%(contents:body)", tag)
+    annotation = f"**{title}**\n\n{body}".strip() if body else (f"**{title}**" if title else "")
     subjects = git("log", "--reverse", "--format=%s", span).splitlines()
 
     groups: dict[str, list[str]] = {}
@@ -40,7 +42,7 @@ def main(tag: str) -> None:
         kind, text = (m.group(1), m.group(2)) if m else ("chore", subject)
         groups.setdefault(kind if kind in dict(GROUPS) else "chore", []).append(text[0].upper() + text[1:])
 
-    out = [annotation, ""] if annotation and annotation != tag else []
+    out = [annotation, ""] if annotation else []
     for kind, heading in GROUPS:
         if groups.get(kind):
             out += [f"## {heading}", *[f"- {line}" for line in groups[kind]], ""]
