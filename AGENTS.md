@@ -118,6 +118,20 @@ deploying. Credentials live in the `production` environment, which only
 `main` can deploy to: the secret `CLOUDFLARE_API_TOKEN` (Workers deploy only)
 and the variable `CLOUDFLARE_ACCOUNT_ID`.
 
+Every build on `main` attests `dist/` (GitHub artifact attestations): anyone can
+check that a file served at yunan.dev was built from the commit named in the
+colophon, with `gh attestation verify FILE -R yunanwg/yunan.dev`.
+
+Releases: push an annotated tag `vMAJOR.MINOR` (edition.revision, so `v1.0` is
+edition 1, Rev. 0). The tag builds and attests the site, then publishes a
+release with the site as a tarball and `yunan.1`, and notes grouped by commit
+type (`scripts/release_notes.py`). The tag's message opens the notes. Tags
+don't deploy; `main` does.
+
+Actions are pinned to commit SHAs and the repository refuses unpinned ones;
+Dependabot opens a weekly PR to move them. `links.yml` checks the page's links
+every Monday; a failure only sends an email.
+
 ## Cloudflare zone notes
 
 - **No injected scripts.** On the Free plan, turning Bot Fight Mode on once also

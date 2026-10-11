@@ -1,0 +1,13 @@
+# Keeps the SHA-pinned actions current: a weekly PR per update, with the tag in a comment.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
