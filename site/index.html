@@ -208,12 +208,12 @@ ol.parts li { margin-bottom: 1rem; padding-left: 2.6rem; text-indent: -2.6rem; }
 ol.parts .k { display: inline-block; width: 2.6rem; text-indent: 0; color: var(--moss); }
 ol.parts b { font-weight: 600; }
 
-/* Employer marks: 1-bit dithered PNGs used as masks, so they print in the text's own colour. */
+/* Employer marks: 1-bit dithered WebPs used as masks, so they print in the text's own colour. */
 .org { white-space: nowrap; }
 .mark { display: inline-block; width: .85em; height: .85em; margin-right: .22em; vertical-align: -.06em; background: currentColor;
   -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
-.m-qonto { --m: url("img/mark-qonto.png"); }
-.m-3ds { --m: url("img/mark-3ds.png"); }
+.m-qonto { --m: url("img/mark-qonto.webp"); }
+.m-3ds { --m: url("img/mark-3ds.webp"); }
 figure { margin: 1rem 0 2rem; }
 figcaption { font: .8rem/1.45 var(--sans); color: var(--dim); margin-top: .5rem; }
 figcaption b { color: var(--ink); font: 600 .95rem var(--cond); letter-spacing: .02em; }
@@ -409,7 +409,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
           <tr><th scope="row">Single-day range</th><td>200</td><td>km</td><td>Self-supported, gravel, small roads</td></tr>
           <tr><th scope="row">Languages</th><td>5</td><td>—</td><td>Teochew, Cantonese, Mandarin, French (C2), English</td></tr>
           <tr><th scope="row">Open ports</th><td>0</td><td>—</td><td>Homelab, all ingress via tunnel</td></tr>
-          <tr><th scope="row">Page weight</th><td><span data-m="total">51.4</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build</td></tr>
+          <tr><th scope="row">Page weight</th><td><span data-m="total">46.8</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build</td></tr>
           <tr><th scope="row">Fuel</th><td>1 to 5</td><td>coffees/day</td><td>Peaks before a Salesforce deployment</td></tr>
           <tr><th scope="row">Song loop, max</th><td>14</td><td>plays</td><td>One Wu Bai song, earphones dead, 70 km from home</td></tr>
           <tr><th scope="row">Exit status</th><td>0</td><td>—</td><td>Unless invoked with npm</td></tr>
@@ -425,12 +425,12 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <p class="route-spec">June 2025, solo. 8 days on foot, 149 km, +7,837 m. Profile on the cover.</p>
     <figure class="plate plate-lead" id="fig-2">
       <span class="tag" aria-hidden="true">Day 7</span>
-      <img src="img/day7-camp-ibex.png" width="576" height="552" loading="lazy" decoding="async" alt="A ridge-line tent pitched on a grassy shoulder. An ibex walks along the edge behind it, with the snowfields of Mont Blanc beyond.">
+      <img src="img/day7-camp-ibex.webp" width="576" height="552" loading="lazy" decoding="async" alt="A ridge-line tent pitched on a grassy shoulder. An ibex walks along the edge behind it, with the snowfields of Mont Blanc beyond.">
       <figcaption><b>Fig. 2.</b> Day 7, the last camp. An ibex walks past the tent; Mont Blanc behind.</figcaption>
     </figure>
     <figure class="plate plate-side plate-over" id="fig-3">
       <span class="tag" aria-hidden="true">Day 5</span>
-      <img src="img/day5-grand-col-ferret.png" width="288" height="326" loading="lazy" decoding="async" alt="A steep valley with long patches of old snow running down to a stream.">
+      <img src="img/day5-grand-col-ferret.webp" width="288" height="326" loading="lazy" decoding="async" alt="A steep valley with long patches of old snow running down to a stream.">
       <figcaption><b>Fig. 3.</b> Day 5, climbing towards the Grand Col Ferret through the last of the snow.</figcaption>
     </figure>
 
@@ -438,14 +438,14 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <p class="route-spec">17–19 July 2025. 3 days on foot from Landmannalaugar to Þórsmörk, 58 km, +1,810 m.</p>
     <figure class="plate plate-tall" id="fig-4">
       <span class="tag" aria-hidden="true">Day 3</span>
-      <img src="img/laugavegur-day3.png" width="400" height="442" loading="lazy" decoding="async" alt="A hiker sits cross-legged on bare rock above a fast grey river in a gorge. Moss covers the cliffs; a glacier lies on the far mountains.">
+      <img src="img/laugavegur-day3.webp" width="400" height="442" loading="lazy" decoding="async" alt="A hiker sits cross-legged on bare rock above a fast grey river in a gorge. Moss covers the cliffs; a glacier lies on the far mountains.">
       <figcaption><b>Fig. 4.</b> The last day, a rest above the river. Moss, rock and, on the horizon, ice.</figcaption>
     </figure>
 
     <h3 class="route"><span class="k">4.3</span> Pommes de Terre Salées</h3>
     <p class="route-spec">24 May 2025. A 200 km gravel brevet from the edge of Paris to the sea at Mers-les-Bains, 205 km, +2,076 m, 11 h 20 min in one day.</p>
     <figure class="plate plate-small" id="fig-5">
-      <img src="img/gravel-200-tree.png" width="288" height="238" loading="lazy" decoding="async" alt="A single broad tree stands at the edge of a ploughed field under a grey sky. A narrow farm road curves past tall dry grass.">
+      <img src="img/gravel-200-tree.webp" width="288" height="238" loading="lazy" decoding="async" alt="A single broad tree stands at the edge of a ploughed field under a grey sky. A narrow farm road curves past tall dry grass.">
       <figcaption><b>Fig. 5.</b> Around noon. One tree, one road, a long way still to the sea.</figcaption>
     </figure>
 
@@ -454,33 +454,33 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <p>Borrowed, with thanks: dithered photographs and a page that admits its own weight, from <a href="https://solar.lowtechmagazine.com/">Low-tech Magazine</a>'s solar edition; the byte budget, from Maciej Cegłowski's talk <a href="https://idlewords.com/talks/website_obesity.htm">The Website Obesity Crisis</a>; notes in the margin, from <a href="https://gwern.net/">gwern.net</a>; and the wish for a page that lasts, from the <a href="https://permacomputing.net/principles/">permacomputing principles</a>.</p>
     <figure>
       <svg class="exploded" viewBox="20 0 490 276" role="img" aria-labelledby="fig2-t">
-        <title id="fig2-t" data-m="f2title">Exploded view of this page, parts unpacked: markup 11,008 bytes, styles 18,715, figures 9,675, fonts 12,796, images 25,704, scripts 0.</title>
+        <title id="fig2-t" data-m="f2title">Exploded view of this page, parts unpacked: markup 12,654 bytes, styles 18,586, figures 9,675, fonts 12,796, images 20,585, scripts 0.</title>
         <g transform="translate(0,6)">
-          <polygon class="plate p" data-plate="markup" style="--c:110px" points="68.0,18 140,6.2 212.0,18 140,29.8"/>
-          <line class="lead" data-lead x1="212.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Markup</text><text class="v" x="402" y="22" text-anchor="end" data-m="markup">11,008</text><text x="406" y="22">B</text>
+          <polygon class="plate p" data-plate="markup" style="--c:110px" points="53.8,18 140,3.9 226.2,18 140,32.1"/>
+          <line class="lead" data-lead x1="226.2" y1="18" x2="300" y2="18"/><text x="308" y="22">Markup</text><text class="v" x="402" y="22" text-anchor="end" data-m="markup">12,654</text><text x="406" y="22">B</text>
         </g>
         <g transform="translate(0,50)">
-          <polygon class="plate p" data-plate="css" style="--c:66px" points="46.1,18 140,2.6 233.9,18 140,33.4"/>
-          <line class="lead" data-lead x1="233.9" y1="18" x2="300" y2="18"/><text x="308" y="22">Styles</text><text class="v" x="402" y="22" text-anchor="end" data-m="css">18,715</text><text x="406" y="22">B</text>
+          <polygon class="plate p" data-plate="css" style="--c:66px" points="35.5,18 140,0.9 244.5,18 140,35.1"/>
+          <line class="lead" data-lead x1="244.5" y1="18" x2="300" y2="18"/><text x="308" y="22">Styles</text><text class="v" x="402" y="22" text-anchor="end" data-m="css">18,586</text><text x="406" y="22">B</text>
         </g>
         <g transform="translate(0,94)">
-          <polygon class="plate p" data-plate="svg" style="--c:22px" points="72.5,18 140,7.0 207.5,18 140,29.0"/>
-          <line class="lead" data-lead x1="207.5" y1="18" x2="300" y2="18"/><text x="308" y="22">Figures</text><text class="v" x="402" y="22" text-anchor="end" data-m="svg">9,675</text><text x="406" y="22">B</text>
+          <polygon class="plate p" data-plate="svg" style="--c:22px" points="64.6,18 140,5.7 215.4,18 140,30.3"/>
+          <line class="lead" data-lead x1="215.4" y1="18" x2="300" y2="18"/><text x="308" y="22">Figures</text><text class="v" x="402" y="22" text-anchor="end" data-m="svg">9,675</text><text x="406" y="22">B</text>
         </g>
         <g transform="translate(0,138)">
-          <polygon class="plate p" data-plate="fonts" style="--c:-22px" points="62.4,18 140,5.3 217.6,18 140,30.7"/>
-          <line class="lead" data-lead x1="217.6" y1="18" x2="300" y2="18"/><text x="308" y="22">Fonts</text><text class="v" x="402" y="22" text-anchor="end" data-m="fonts">12,796</text><text x="406" y="22">B, two subsets</text>
+          <polygon class="plate p" data-plate="fonts" style="--c:-22px" points="53.3,18 140,3.8 226.7,18 140,32.2"/>
+          <line class="lead" data-lead x1="226.7" y1="18" x2="300" y2="18"/><text x="308" y="22">Fonts</text><text class="v" x="402" y="22" text-anchor="end" data-m="fonts">12,796</text><text x="406" y="22">B, two subsets</text>
         </g>
         <g transform="translate(0,182)">
           <polygon class="plate p" data-plate="img" style="--c:-66px" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
-          <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Images</text><text class="v" x="402" y="22" text-anchor="end" data-m="img">25,704</text><text x="406" y="22">B, <tspan data-m="plates">four</tspan> plates, <tspan data-m="marks">two</tspan> marks</text>
+          <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Images</text><text class="v" x="402" y="22" text-anchor="end" data-m="img">20,585</text><text x="406" y="22">B, <tspan data-m="plates">four</tspan> plates, <tspan data-m="marks">two</tspan> marks</text>
         </g>
         <g transform="translate(0,226)">
           <polygon class="empty p" data-plate="js" style="--c:-110px" points="30.0,18 140,0.0 250.0,18 140,36.0"/>
           <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Scripts</text><text class="v" x="402" y="22" text-anchor="end" data-m="js">0</text><text x="406" y="22">B</text>
         </g>
       </svg>
-      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">51.4</span> kB; a server using brotli sends less.</figcaption>
+      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">46.8</span> kB; a server using brotli sends less.</figcaption>
     </figure>
 
     <h2 id="contact"><span class="n">6</span> Contact</h2>

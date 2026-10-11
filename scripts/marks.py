@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the employer marks as 1-bit PNG masks (DESIGN-RULES X2, marks).
+"""Print the employer marks as 1-bit WebP masks (DESIGN-RULES X2, marks).
 
 The page paints them with the text colour through `mask-image`, so one file
 serves light and dark. Edge pixels are ordered-dithered, like the plates.
@@ -39,12 +39,13 @@ def mark(src: pathlib.Path, out: str) -> None:
             v = min(1, max(0, (px[x, y] - LO) / (HI - LO)))  # the field prints as nothing
             qp[x, y] = 1 if v > (M[y % 4][x % 4] + .5) / 16 else 0
     q.putpalette([0, 0, 0, 0, 0, 0] + [0, 0, 0] * 254)
-    buf = io.BytesIO(); q.save(buf, "PNG", optimize=True, bits=1, transparency=0)
+    q.info["transparency"] = 0  # index 0 is the field, fully transparent
+    buf = io.BytesIO(); q.convert("RGBA").save(buf, "WEBP", lossless=True, quality=100, method=6)
     (OUT / out).write_bytes(buf.getvalue())
     print(out, len(buf.getvalue()), "B")
 
 
 if __name__ == "__main__":
     require(SRC / "mark-qonto.png", SRC / "mark-3ds.jpg")
-    mark(SRC / "mark-qonto.png", "mark-qonto.png")
-    mark(SRC / "mark-3ds.jpg", "mark-3ds.png")
+    mark(SRC / "mark-qonto.png", "mark-qonto.webp")
+    mark(SRC / "mark-3ds.jpg", "mark-3ds.webp")

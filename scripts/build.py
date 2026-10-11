@@ -72,7 +72,7 @@ def counts() -> dict:
 
 
 def hash_assets(page: str) -> str:
-    for path in sorted([*DIST.glob("fonts/*.woff2"), *DIST.glob("img/*.png")]):
+    for path in sorted([*DIST.glob("fonts/*.woff2"), *DIST.glob("img/*.webp")]):
         rel = path.relative_to(DIST).as_posix()
         digest = hashlib.sha256(path.read_bytes()).hexdigest()[:10]
         hashed = f"{path.parent.name}/{path.stem}.{digest}{path.suffix}"

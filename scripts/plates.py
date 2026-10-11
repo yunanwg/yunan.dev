@@ -16,10 +16,10 @@ INKS = ["eceee8", "c6cf86", "7d9cb4", "4f5d22", "17302a"]  # paper, lichen, glac
 SPREAD, SAT = 70, 1.6
 # (original, published file, display width in CSS px, crop as left,top,right,bottom shares)
 PLATES = [
-    ("tmb-day7-ibex.jpg", "day7-camp-ibex.png", 576, (0, .2, 1, .92)),
-    ("tmb-day5-snow.jpg", "day5-grand-col-ferret.png", 288, (0, .15, 1, 1)),
-    ("laugavegur-day3.jpg", "laugavegur-day3.png", 400, (0, .03, 1, .86)),
-    ("gravel-200-tree.jpg", "gravel-200-tree.png", 288, (0, .38, 1, 1)),
+    ("tmb-day7-ibex.jpg", "day7-camp-ibex.webp", 576, (0, .2, 1, .92)),
+    ("tmb-day5-snow.jpg", "day5-grand-col-ferret.webp", 288, (0, .15, 1, 1)),
+    ("laugavegur-day3.jpg", "laugavegur-day3.webp", 400, (0, .03, 1, .86)),
+    ("gravel-200-tree.jpg", "gravel-200-tree.webp", 288, (0, .38, 1, 1)),
 ]
 M = [[0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],[12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
      [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],[15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]]
@@ -63,7 +63,7 @@ def main() -> None:
     require(*(SRC / src for src, *_ in PLATES))
     for src, out, display_w, crop in PLATES:
         q = plate(SRC / src, display_w, crop)
-        buf = io.BytesIO(); q.save(buf, "PNG", optimize=True, bits=4)  # no metadata is written
+        buf = io.BytesIO(); q.convert("RGB").save(buf, "WEBP", lossless=True, quality=100, method=6)  # no metadata is written
         (OUT / out).write_bytes(buf.getvalue())
         print(f"{out}: {q.width}x{q.height} file, shown {display_w}x{q.height * 2}, {len(buf.getvalue()):,} B")
 

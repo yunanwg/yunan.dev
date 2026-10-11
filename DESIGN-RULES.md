@@ -108,7 +108,7 @@ so each colour gets its own pattern.
 ordered dither (8 × 8 Bayer): paper `#eceee8`, lichen `#c6cf86`, glacier
 `#7d9cb4`, moss `#4f5d22`, spruce `#17302a`. Each dot takes the nearest ink by
 colour, not by brightness, so blue stays blue and green stays green; a grey sky
-prints as paper. Files are 4-bit palette PNGs. Glacier is a plate ink only; no
+prints as paper. Files are lossless WebPs in the five inks. Glacier is a plate ink only; no
 text or UI uses it. Plates keep their inks in dark mode, a printed plate on a
 dark page, never a negative.
 
@@ -126,7 +126,7 @@ dark page, never a negative.
   date, and nothing that can't be checked. Companions are not named.
 
 - **Marks.** Employer marks (the symbol only, never the wordmark) sit before
-  the name in running text, at cap height. They are 32 px 1-bit PNGs with
+  the name in running text, at cap height. They are 32 px 1-bit WebPs with
   ordered-dithered edges (`scripts/marks.py`), used as CSS masks so they take
   the text's own colour in both themes. No brand colour.
 

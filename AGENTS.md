@@ -60,8 +60,8 @@ and their outputs are committed.
 | Script | Writes | Run when |
 |---|---|---|
 | `scripts/fig1.py` | Fig. 1 SVG, keyframes and caption in `site/index.html` | `assets/tmb-profile.json` changes |
-| `scripts/plates.py` | `site/img/*.png` photo plates (needs Pillow) | a photo or crop changes |
-| `scripts/marks.py` | `site/img/mark-*.png` employer marks (needs Pillow) | a mark changes |
+| `scripts/plates.py` | `site/img/*.webp` photo plates (needs Pillow) | a photo or crop changes |
+| `scripts/marks.py` | `site/img/mark-*.webp` employer marks (needs Pillow) | a mark changes |
 | `scripts/icons.py` | `site/favicon.ico`, `favicon-96.png`, `apple-touch-icon.png` from the Fig. 2 ibex (needs Pillow) | the icon changes |
 | `scripts/og.py` | `site/og.png`, the link preview: the cover's name beside Fig. 2 (needs Pillow and Chrome) | the cover or Fig. 2 changes |
 | `scripts/strip.py` | strips a JPEG's metadata in place, losslessly | a new original lands in `assets/` |

@@ -25,11 +25,11 @@ def weigh(text: str, base: pathlib.Path | None = None) -> dict:
     raw = text.encode()
     fonts = img = 0
     plates = len(set(re.findall(r'<img[^>]*\ssrc="([^"]+)"', text)))
-    marks = len(set(re.findall(r'url\("?([^")]+\.png)"?\)', text)))
+    marks = len(set(re.findall(r'url\("?([^")]+\.(?:png|webp))"?\)', text)))
     if base is not None:
         for url in sorted(set(re.findall(r'url\("?([^")]+\.woff2)"?\)', text))):
             fonts += (base / url).stat().st_size
-        srcs = set(re.findall(r'<img[^>]*\ssrc="([^"]+)"', text)) | set(re.findall(r'url\("?([^")]+\.png)"?\)', text))
+        srcs = set(re.findall(r'<img[^>]*\ssrc="([^"]+)"', text)) | set(re.findall(r'url\("?([^")]+\.(?:png|webp))"?\)', text))
         srcs |= {m.lstrip("/") for m in re.findall(r'<link rel="icon" href="([^"]+)" sizes="32x32"', text)}  # the tab icon
         for src in sorted(srcs):
             img += (base / src).stat().st_size
