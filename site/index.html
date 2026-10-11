@@ -60,6 +60,8 @@ a:hover { color: var(--moss); }
 }
 a:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
 p { margin: 0 0 1rem; text-wrap: pretty; hyphens: auto; hyphenate-limit-chars: 7 3 3; }
+/* Justified where the measure is wide enough; a phone column keeps a ragged right. */
+@media (min-width: 40rem) { .main p:not([class]) { text-align: justify; } }
 .org, [lang], .nh { hyphens: manual; }
 code { font: .85em var(--mono); overflow-wrap: anywhere; hyphens: manual; }
 ::selection, ::target-text { background: var(--lichen); color: var(--spruce); }
@@ -263,11 +265,18 @@ abbr { font-variant: all-small-caps; letter-spacing: .04em; text-decoration: non
 
 .front h2 { font: 600 1.05rem/1.3 var(--cond); letter-spacing: .02em; margin: 0 0 .4rem; display: block; border-bottom: 2px solid var(--ink); padding-bottom: .25rem; }
 .front ol { margin: 0; padding-left: 1.4rem; }
+.front nav + nav { margin-top: 1.25rem; }
+.front nav + nav ol { padding-left: 3.2rem; }
+.front nav + nav li::marker { content: "Fig. " counter(list-item) "  "; font: 600 .95rem var(--cond); }
 
 /* Sections: numbers at display scale. */
 h2 { font-size: 1.4rem; font-weight: 600; margin: 3rem 0 .75rem; display: flex; align-items: last baseline; gap: .9rem; text-wrap: balance; }
 h2 .n { font: 600 5rem/.72 var(--cond); color: var(--moss); }
 h2[id] { scroll-margin-top: 1.5rem; }
+/* The press colour bar: the five inks every plate is printed in (X2), as swatches with their names. */
+.inks { display: flex; flex-wrap: wrap; gap: .5rem; font: 600 .8rem/1.2 var(--cond); letter-spacing: .02em; }
+.inks span::before { content: ""; display: block; width: 3rem; height: 1.25rem; margin-bottom: .2rem; background: var(--c); outline: 1px solid var(--rule); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.spec-foot { margin: 0; padding: .4rem .75rem; border-top: 1px solid var(--rule); font: .75rem/1.4 var(--sans); color: var(--dim); }
 /* Trim the numeral to its cap height, so it stands exactly on the heading's baseline. */
 @supports (text-box: trim-both cap alphabetic) { h2 .n { line-height: 1; text-box: trim-both cap alphabetic; } }
 sup { line-height: 0; }
@@ -483,7 +492,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     <h1 translate="no"><span class="zh" lang="zh-Hans">王煜楠</span><span class="en">Yunan Wang</span></h1>
     <p class="what">A field manual for one person<br> who makes things, rides far, and cares about the planet.</p>
   </div>
-  <figure style="margin:0">
+  <figure style="margin:0" id="fig-1">
     <svg viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Elevation profile of the Tour du Mont Blanc, 149 km over 8 days, from 1000 to 2475 metres">
       <defs><pattern id="dither-l" class="dl" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="2" width="1" height="1" opacity=".5"/><rect y="2" width="1" height="1" opacity=".5"/></pattern></defs>
       <g class="ride-g">
@@ -521,6 +530,17 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
           <li><a href="#contact">Contact</a></li>
         </ol>
       </nav>
+      <nav aria-labelledby="lof-h">
+        <h2 id="lof-h">Figures</h2>
+        <ol>
+          <li><a href="#fig-1">Tour du Mont Blanc, elevation</a></li>
+          <li><a href="#fig-2">Day 7, the last camp</a></li>
+          <li><a href="#fig-3">Day 5, towards the Grand Col Ferret</a></li>
+          <li><a href="#fig-4">Laugavegur, the last day</a></li>
+          <li><a href="#fig-5">Around noon, one tree, one road</a></li>
+          <li><a href="#fig-6">This page, exploded</a></li>
+        </ol>
+      </nav>
     </div>
 
     <h2 id="purpose"><span class="n">1</span> Purpose</h2>
@@ -548,16 +568,20 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
         <thead><tr><th scope="col">Parameter</th><th scope="col">Value</th><th scope="col">Unit</th><th scope="col">Conditions</th></tr></thead>
         <tbody>
           <tr><th scope="row">Operating temperature</th><td>−1 to +21</td><td>°C</td><td>21 rides of 20 km or more; median 10 °C</td></tr>
-          <tr><th scope="row">Single-day range</th><td>200</td><td>km</td><td>Self-supported, gravel, small roads</td></tr>
+          <tr><th scope="row">Single-day range</th><td>200</td><td>km</td><td>Self-supported, gravel, small roads; see 4.3</td></tr>
+          <tr><th scope="row">Vertical gain, 2026</th><td>6,122</td><td>m</td><td>On foot and by bike, to 11 October; about 0.69 Everest</td></tr>
+          <tr><th scope="row">Locomotion, 2026</th><td>72</td><td>% wheels</td><td>365 km by bike, 133 on foot, 6 swimming</td></tr>
           <tr><th scope="row">Languages</th><td>5</td><td>—</td><td>Teochew, Cantonese, Mandarin, French (C2), English</td></tr>
           <tr><th scope="row">Open ports</th><td>0</td><td>—</td><td>Homelab, all ingress via tunnel</td></tr>
-          <tr><th scope="row">Page weight</th><td><span data-m="total">47.1</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build</td></tr>
+          <tr><th scope="row">Page weight</th><td><span data-m="total">47.1</span></td><td>kB</td><td>This page, its fonts and images, compressed, measured at build; see Fig. 6</td></tr>
           <tr><th scope="row">Fuel</th><td>1 to 5</td><td>coffees/day</td><td>Peaks before a Salesforce deployment</td></tr>
+          <tr><th scope="row">Sleep, median</th><td>7.3</td><td>h/night</td><td>Last 30 nights, to 10 October. Target: better</td></tr>
           <tr><th scope="row">Song loop, max</th><td>14</td><td>plays</td><td>One Wu Bai song, earphones dead, 70 km from home</td></tr>
           <tr><th scope="row">Exit status</th><td>0</td><td>—</td><td>Unless invoked with npm</td></tr>
         </tbody>
       </table>
       </div>
+      <p class="spec-foot">Specifications subject to change without notice.</p>
     </div>
 
     <h2 id="terrain"><span class="n">4</span> Terrain</h2>
@@ -565,7 +589,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
 
     <section class="leg">
     <h3 class="route"><span class="k">4.1</span> Tour du Mont Blanc</h3>
-    <p class="route-spec">June 2025, solo. 8 days on foot, 149 km, +7,837 m. Profile on the cover.</p>
+    <p class="route-spec">June 2025, solo. 8 days on foot, 149 km, +7,837 m. Profile on the cover, Fig. 1.</p>
     <figure class="plate plate-lead" id="fig-2">
       <span class="tag" aria-hidden="true">Day 7</span>
       <img src="img/day7-camp-ibex.webp" width="576" height="552" loading="lazy" decoding="async" alt="A ridge-line tent pitched on a grassy shoulder. An ibex walks along the edge behind it, with the snowfields of Mont Blanc beyond.">
@@ -598,8 +622,9 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
     </section>
 <h2 id="colophon"><span class="n">5</span> Colophon</h2>
     <p>This page is one <abbr>HTML</abbr> file, two font subsets, <span data-m="plates">four</span> dithered photographs and no scripts. Running text is set in your system's own serif. Labels are set in Barlow Condensed, and the name in Noto Serif SC cut down to its three characters, both under the SIL Open Font License. Fig. 1 is drawn from my watch's records of the walk, with elevation from a public terrain model. Every number in Fig. 6 is measured when the page is built.</p>
+    <p class="inks" aria-label="The five inks of the plates"><span style="--c:#eceee8">paper</span><span style="--c:#c6cf86">lichen</span><span style="--c:#7d9cb4">glacier</span><span style="--c:#4f5d22">moss</span><span style="--c:#17302a">spruce</span></p>
     <p>Borrowed, with thanks: dithered photographs and a page that admits its own weight, from <a href="https://solar.lowtechmagazine.com/">Low-tech Magazine</a>'s solar edition; the byte budget, from Maciej Cegłowski's talk <a href="https://idlewords.com/talks/website_obesity.htm">The Website Obesity Crisis</a>; notes in the margin, from <a href="https://gwern.net/">gwern.net</a>; and the wish for a page that lasts, from the <a href="https://permacomputing.net/principles/">permacomputing principles</a>.</p>
-    <figure>
+    <figure id="fig-6">
       <svg class="exploded" viewBox="20 0 520 276" role="img" aria-labelledby="fig2-t">
         <defs>
         <!-- Ordered dither (4 × 4 Bayer) at five densities, one per part in Fig. 6. -->
@@ -635,7 +660,7 @@ h3.route .k { color: var(--moss); margin-right: .5rem; }
           <line class="lead" data-lead x1="250.0" y1="18" x2="300" y2="18"/><text x="308" y="22">Scripts</text><text class="v" x="402" y="22" text-anchor="end" data-m="js">0</text><text x="406" y="22">B</text>
         </g>
       </svg>
-      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">47.1</span> kB; a server using brotli sends less.</figcaption>
+      <figcaption><b>Fig. 6.</b> This page, exploded, parts shown unpacked; each plate's area is in proportion to its size. Compressed with gzip, the page, its fonts and its images weigh <span data-m="total">47.1</span> kB; a server using brotli sends less. A first visit emits about <span data-m="co2">5.2</span> mg of CO2e (Sustainable Web Design model, version 4).</figcaption>
     </figure>
 
     <h2 id="contact"><span class="n">6</span> Contact</h2>

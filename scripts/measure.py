@@ -17,6 +17,12 @@ PAGE = pathlib.Path(__file__).resolve().parent.parent / "site/index.html"
 FIRST_ROUND_TRIP_KB = 14.6  # 10 TCP segments x 1460 B
 BUDGET_HTML_GZ = 14_000      # R5: HTML, compressed
 BUDGET_TOTAL = 100_000       # R5: page + fonts + images, compressed
+# Sustainable Web Design model v4 (sustainablewebdesign.org/estimating-digital-emissions):
+# energy per GB transferred, operational + embodied, for networks and user devices plus the data
+# centre's embodied share. The data centre's operational share is left out because Cloudflare is
+# verified green by the Green Web Foundation (green hosting factor 1). Global grid: Ember, 494 g/kWh.
+KWH_PER_GB = (0.059 + 0.013) + (0.080 + 0.081) + 0.012
+GRID_G_PER_KWH = 494
 
 NUMBER_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine"}
 
@@ -71,6 +77,7 @@ def fill(text: str, w: dict) -> str:
         "plates": NUMBER_WORDS.get(w["plates"], str(w["plates"])),
         "marks": NUMBER_WORDS.get(w["marks"], str(w["marks"])),
         "total": f"{w['total'] / 1000:.1f}",
+        "co2": f"{w['total'] / 1e9 * KWH_PER_GB * GRID_G_PER_KWH * 1000:.1f}",
         "f2title": (f"Exploded view of this page, parts unpacked: markup {w['markup']:,} bytes, "
                     f"styles {w['css']:,}, figures {w['svg']:,}, fonts {w['fonts']:,}, images {w['img']:,}, scripts {w['js']:,}."),
     }
