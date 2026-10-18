@@ -5,6 +5,16 @@ site on a single page, built to be small, fast, script-free and long-lived.
 Read `DESIGN-RULES.md` before changing anything visible; rules are cited by
 name (R1–R5, T, X, L, C, M, P).
 
+## Where the source lives
+
+The site is edited in a private repository, beside the career facts it must
+agree with, and published to github.com/yunanwg/yunan.dev as a pull request
+that the private repository's workflow opens and squash-merges. Each publish
+is one commit here, titled with the change's Conventional Commit subject.
+Don't push or merge in the public repository by hand: the next publish
+refuses to overwrite a state it never had. Paths below are relative to this
+folder; run the commands from it.
+
 ## Layout
 
 ```
@@ -130,7 +140,7 @@ type (`scripts/release_notes.py`). The tag's message opens the notes. Tags
 don't deploy; `main` does.
 
 Actions are pinned to commit SHAs and the repository refuses unpinned ones;
-Dependabot opens a weekly PR to move them. `links.yml` checks the page's links
+Dependabot, configured in the private repository, opens a weekly PR there to move them. `links.yml` checks the page's links
 every Monday; a failure only sends an email.
 
 ## Cloudflare zone notes
