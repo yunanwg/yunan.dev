@@ -18,6 +18,8 @@ jobs:
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8  # v2.9.0
         with:
           # LinkedIn answers robots with 999. Mail addresses are skipped by default
-          # (checked by hand); --root-dir resolves the root-relative links.
-          args: --no-progress --accept 200..=299,429,999 --root-dir ${{ github.workspace }}/site site/index.html site/404.html
+          # (checked by hand); --root-dir resolves the root-relative links. Low-tech
+          # Magazine's solar server drops out briefly when its battery runs low, so
+          # a link gets a minute per try and 30 s between its three retries.
+          args: --no-progress --timeout 60 --retry-wait-time 30 --accept 200..=299,429,999 --root-dir ${{ github.workspace }}/site site/index.html site/404.html
           fail: true
