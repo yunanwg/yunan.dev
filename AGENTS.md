@@ -139,6 +139,20 @@ release with the site as a tarball and `yunan.1`, and notes grouped by commit
 type (`scripts/release_notes.py`). The tag's message opens the notes. Tags
 don't deploy; `main` does.
 
+IPFS: every build also addresses `dist/` on IPFS, offline, with kubo's
+`unixfs-v1-2025` profile (IPIP-499) and `--hidden` (the profile would drop
+`.well-known/`), and attests the resulting `site.car` beside `dist/**`. A deploy
+from `main` then pins the CAR on Filebase (S3 import, so the pinned CID is the
+build's, and the job checks it) and points the Filebase IPNS name `yunan-dev`
+at it, keeping the last 10 pins. `yunan.eth`'s contenthash is `ipns://<that
+name>`, set once from the owner's wallet, so https://yunan.eth.limo serves the
+same bytes as yunan.dev with no signature per deploy. The `production`
+environment holds `FILEBASE_KEY`, `FILEBASE_SECRET` and the variable
+`FILEBASE_BUCKET`; without the variable the step is skipped. A release also
+attaches the CAR. To check a served page against a release:
+`ipfs init --profile unixfs-v1-2025 && ipfs add -r --hidden --only-hash -Q DIR`
+on the unpacked tarball prints the same CID as that run's summary.
+
 Actions are pinned to commit SHAs and the repository refuses unpinned ones;
 Dependabot, configured in the private repository, opens a weekly PR there to move them. `links.yml` checks the page's links
 every Monday; a failure only sends an email.

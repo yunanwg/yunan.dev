@@ -20,6 +20,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      cid: ${{ steps.ipfs.outputs.cid }}
     permissions:
       contents: read
       id-token: write      # signs the provenance attestation
@@ -35,18 +37,44 @@ jobs:
       - run: python3 scripts/build.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # The content address of this dist/, offline. IPIP-499's unixfs-v1-2025 profile fixes
+      # every import parameter, so anyone adding the same files gets the same CID; --hidden
+      # keeps .well-known/, which the profile skips by default. site.car holds the blocks.
+      - name: Address dist/ on IPFS
+        id: ipfs
+        env:
+          KUBO: v0.43.1
+          KUBO_SHA512: ff53b2428794fc8cca39505d28c15b4cceaef4b90a09284f291f611fcdc8c06399690575fc89cbd4d85ef71f3652581296c6f2e710386f887c8edf36b6e89d71
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/kubo.tgz" "https://github.com/ipfs/kubo/releases/download/$KUBO/kubo_${KUBO}_linux-amd64.tar.gz"
+          echo "$KUBO_SHA512  $RUNNER_TEMP/kubo.tgz" | sha512sum -c -
+          tar -xzf "$RUNNER_TEMP/kubo.tgz" -C "$RUNNER_TEMP" kubo/ipfs
+          export IPFS_PATH="$RUNNER_TEMP/ipfs"
+          ipfs="$RUNNER_TEMP/kubo/ipfs"
+          "$ipfs" init --profile unixfs-v1-2025 --empty-repo >/dev/null
+          cid=$("$ipfs" add -r --hidden --quieter --offline dist)
+          "$ipfs" dag export "$cid" > site.car
+          echo "cid=$cid" >> "$GITHUB_OUTPUT"
+          echo "IPFS: \`$cid\`" >> "$GITHUB_STEP_SUMMARY"
       # A signed statement, per file, that this dist/ was built from this commit by this workflow.
       # Check a file from the live site with:
       #   gh attestation verify FILE -R yunanwg/yunan.dev --signer-workflow yunanwg/yunan.dev/.github/workflows/deploy.yml
       - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
         if: github.event_name != 'pull_request'
         with:
-          subject-path: "dist/**"
+          subject-path: |
+            dist/**
+            site.car
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: dist
           path: dist
           include-hidden-files: true  # .well-known/
+          retention-days: 7
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: car
+          path: site.car
           retention-days: 7
 
   deploy:
@@ -69,6 +97,47 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.149.0"  # assets-only Workers need wrangler 4
           command: deploy
+      # The same bytes on IPFS, reached as yunan.eth: its contenthash is ipns://<name>, set
+      # once by the owner's wallet, and this step points that IPNS name at each new CID.
+      # Filebase pins the CAR as-is (so the CID is ours, checked below) and keeps the
+      # name's record published. Skipped until the bucket variable exists.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+        if: vars.FILEBASE_BUCKET != ''
+        with:
+          name: car
+      - name: Publish to IPFS
+        if: vars.FILEBASE_BUCKET != ''
+        env:
+          CID: ${{ needs.build.outputs.cid }}
+          BUCKET: ${{ vars.FILEBASE_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.FILEBASE_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.FILEBASE_SECRET }}
+          AWS_DEFAULT_REGION: us-east-1
+          LABEL: yunan-dev
+          KEEP: 10  # pins kept; the free plan allows 500
+        run: |
+          s3() { aws --endpoint-url https://s3.filebase.com s3api "$@"; }
+          key="site-$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_SHA::7}.car"
+          s3 put-object --bucket "$BUCKET" --key "$key" --body site.car --metadata import=car >/dev/null
+          pinned=$(s3 head-object --bucket "$BUCKET" --key "$key" --query Metadata.cid --output text)
+          if [ "$pinned" != "$CID" ]; then
+            echo "::error::Filebase pinned $pinned, the build addressed $CID"
+            exit 1
+          fi
+
+          api=https://api.filebase.io/v1/names
+          auth="Authorization: Bearer $(printf '%s:%s' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | base64 -w0)"
+          name_key() { curl -fsS -H "$auth" "$api" | jq -r --arg l "$LABEL" '[.. | objects | select(.label? == $l) | .network_key][0] // empty'; }
+          if [ -n "$(name_key)" ]; then
+            curl -fsS -X PUT -H "$auth" -H "Content-Type: application/json" -d "{\"cid\":\"$CID\"}" "$api/$LABEL" >/dev/null
+          else
+            curl -fsS -X POST -H "$auth" -H "Content-Type: application/json" -d "{\"label\":\"$LABEL\",\"cid\":\"$CID\"}" "$api" >/dev/null
+          fi
+          echo "IPFS: \`$CID\`; IPNS: \`$(name_key)\` (yunan.eth's contenthash is ipns://$(name_key))" >> "$GITHUB_STEP_SUMMARY"
+
+          s3 list-objects-v2 --bucket "$BUCKET" --prefix site- --query 'Contents[].Key' --output text \
+            | tr '\t' '\n' | sort | head -n -"$KEEP" \
+            | while read -r old; do s3 delete-object --bucket "$BUCKET" --key "$old"; done
 
   release:
     needs: build
@@ -86,12 +155,16 @@ jobs:
         with:
           name: dist
           path: dist
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+        with:
+          name: car
       - name: Package the edition
         run: |
           # checkout turns an annotated tag into a lightweight one; fetch the real tag for its message
           git fetch --force origin "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
           tar -czf "yunan.dev-${GITHUB_REF_NAME}.tar.gz" -C dist .
           cp dist/yunan.1 yunan.1
+          mv site.car "yunan.dev-${GITHUB_REF_NAME}.car"
           python3 scripts/release_notes.py "$GITHUB_REF_NAME" > notes.md
       - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
         with:
@@ -99,4 +172,4 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "yunan.dev-${GITHUB_REF_NAME}.tar.gz" yunan.1 --title "yunan.dev $GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" "yunan.dev-${GITHUB_REF_NAME}.tar.gz" "yunan.dev-${GITHUB_REF_NAME}.car" yunan.1 --title "yunan.dev $GITHUB_REF_NAME" --notes-file notes.md --verify-tag
