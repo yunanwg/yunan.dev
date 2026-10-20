@@ -113,21 +113,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.FILEBASE_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.FILEBASE_SECRET }}
           AWS_DEFAULT_REGION: us-east-1
-          # CLI v2 otherwise streams uploads as aws-chunked with a trailing
-          # checksum, which S3-compatible stores may not decode
-          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
           LABEL: yunan-dev
           KEEP: 10  # pins kept; the free plan allows 500
         run: |
           s3() { aws --endpoint-url https://s3.filebase.com s3api "$@"; }
           key="site-$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_SHA::7}.car"
           s3 put-object --bucket "$BUCKET" --key "$key" --body site.car --metadata import=car >/dev/null
-          for _ in 1 2 3 4 5 6; do
-            pinned=$(s3 head-object --bucket "$BUCKET" --key "$key" --query Metadata.cid --output text)
-            [ "$pinned" != None ] && break
-            sleep 10
-          done
+          # Filebase returns the metadata key capitalised: {"Cid": ..., "Import": "car"}
+          pinned=$(s3 head-object --bucket "$BUCKET" --key "$key" --query Metadata.Cid --output text)
           if [ "$pinned" != "$CID" ]; then
             s3 head-object --bucket "$BUCKET" --key "$key" --query '{size: ContentLength, metadata: Metadata}'
             echo "::error::Filebase pinned $pinned, the build addressed $CID (site.car is $(stat -c %s site.car) bytes)"
