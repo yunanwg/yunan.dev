@@ -135,7 +135,12 @@ jobs:
           else
             curl -fsS -X POST -H "$auth" -H "Content-Type: application/json" -d "{\"label\":\"$LABEL\",\"cid\":\"$CID\"}" "$api" >/dev/null
           fi
-          echo "IPFS: \`$CID\`; IPNS: \`$(name_key)\` (yunan.eth's contenthash is ipns://$(name_key))" >> "$GITHUB_STEP_SUMMARY"
+          name=$(name_key)
+          if [ -z "$name" ]; then
+            echo "::error::Filebase has no IPNS name labelled $LABEL"
+            exit 1
+          fi
+          echo "IPFS: $CID; IPNS: $name (yunan.eth's contenthash is ipns://$name)" | tee -a "$GITHUB_STEP_SUMMARY"
 
           s3 list-objects-v2 --bucket "$BUCKET" --prefix site- --query 'Contents[].Key' --output text \
             | tr '\t' '\n' | sort | head -n -"$KEEP" \
