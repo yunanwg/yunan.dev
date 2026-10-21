@@ -284,8 +284,3 @@ deadpan: the datasheet, field notes, error states.
 Gradients, drop shadows, glassmorphism, rounded cards, hero images, stock
 icons, cursor effects, scroll-jacking, cookie banners, analytics, web fonts for
 body text, tracked-out uppercase labels, the colour red.
-
-## Open questions for phase 4
-
-- Real data for the datasheet.
-- Font subsetting in CI. See `README.md`.
